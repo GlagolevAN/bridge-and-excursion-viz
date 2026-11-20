@@ -546,9 +546,9 @@
         }
       }
     ], {
-      xaxis: Object.assign({ title: { text: "n" }, type: "log" },
+      xaxis: Object.assign({ title: { text: "n (лог. шкала)" }, type: "log" },
         T.plainLog(sizes[0], sizes[sizes.length - 1])),
-      yaxis: Object.assign({ title: { text: "Вероятность" }, type: "log" },
+      yaxis: Object.assign({ title: { text: "Вероятность (лог. шкала)" }, type: "log" },
         T.plainLog(ymin, ymax)),
       margin: { l: 68, r: 18, t: 20, b: 96 }
     });
@@ -612,7 +612,7 @@
     });
     T.plot("plot-conn-threshold", ptraces, {
       xaxis: { title: { text: "p" } },
-      yaxis: { title: { text: "Pₙ(p)" }, type: "log" },
+      yaxis: { title: { text: "Pₙ(p) (лог. шкала)" }, type: "log" },
       margin: { l: 66, r: 18, t: 20, b: 96 }
     });
 

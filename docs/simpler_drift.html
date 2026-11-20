@@ -334,9 +334,9 @@
         line: { color: T.colors.grey, width: 1.3, dash: "dot" }
       }
     ], {
-      xaxis: Object.assign({ title: { text: "n" }, type: "log" },
+      xaxis: Object.assign({ title: { text: "n (лог. шкала)" }, type: "log" },
         T.plainLog(sizes[0], sizes[sizes.length - 1])),
-      yaxis: Object.assign({ title: { text: "Вероятность" }, type: "log" },
+      yaxis: Object.assign({ title: { text: "Вероятность (лог. шкала)" }, type: "log" },
         T.plainLog(ymin, ymax)),
       /* Каждая подпись — отдельной строкой во всю ширину графика:
          иначе три длинные строки переносятся и накладываются. */
