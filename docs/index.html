@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мосты и экскурсии · визуализации</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="assets/theme.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="index.html">мосты и экскурсии <span>·</span> визуализации</a>
+    <nav class="nav">
+      <a href="index.html" class="active">Обзор</a>
+      <a href="rec_struct.html">Структура моста</a>
+      <a href="simpler_drift.html">Сублинейный снос</a>
+      <a href="erdos_renyi.html">Эрдёш—Реньи</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <h1>Мосты и экскурсии: картинки к трём статьям</h1>
+    <p class="lede">
+      Условная положительность неоднородного блуждания со сносом и её
+      приложение к связности случайного графа. Десять статических фигур для
+      статьи, постера и блога плюс три интерактивные страницы, где параметры
+      можно двигать ползунками.
+    </p>
+    <p class="meta">
+      Все численные значения — точные динамические программы, а не
+      сэмплирование с отвержением. Там, где показан Монте-Карло, он приведён
+      рядом с точной кривой для сравнения.
+    </p>
+    <div class="toc">
+      <a href="#catalogue">каталог фигур</a>
+      <a href="#interactive">интерактивные опыты</a>
+      <a href="#exact">что именно считается</a>
+      <a href="#files">файлы и сборка</a>
+    </div>
+  </div>
+
+  <p>
+    Три сюжета. <strong>Структура моста</strong>: что делает типичная
+    траектория при известном конце, как работает наклон Крамера и почему
+    экскурсия факторизуется по среднему сечению. <strong>Сублинейный
+    снос</strong>: снос $\mu_{n,i} \asymp i\,n^{\alpha-1}$ растёт, но
+    пошагово стремится к нулю — как это меняет вероятность остаться выше
+    барьера. <strong>Эрдёш—Реньи</strong>: обход графа как блуждание,
+    пуассоновский мост и точная вероятность связности с пределом
+    $e^{-e^{-c}}$.
+  </p>
+
+  <section class="card" id="catalogue">
+    <h2>Каталог статических фигур</h2>
+    <p class="small">
+      Нажмите на картинку, чтобы открыть её в полном размере. В каталоге
+      показан пресет <code>blog</code>; в <code>out/</code> для каждой
+      фигуры лежат PDF, PNG (300 dpi) и SVG в пресетах
+      <code>paper_wide</code>, <code>poster</code> и <code>blog</code>.
+    </p>
+
+    <h3>Структура моста · <code>rec_struct</code></h3>
+    <div class="gallery">
+      <figure class="fig">
+        <a href="figures/fig1_typical_bridge_blog.png"><img src="figures/fig1_typical_bridge_blog.png" alt="Типичный мост при неоднородном сносе" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 1 · теорема о типичном мосте</div>
+          <h4>Типичный мост при неоднородном сносе</h4>
+          <p>Ансамбль точных выборок моста $S_n=k$; полоса — поточечные квантили 5–95 %. Справа — сходимость условной вероятности положительности на растущем начальном участке к безусловной.</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="figures/fig2_cramer_tilt_blog.png"><img src="figures/fig2_cramer_tilt_blog.png" alt="Преобразование Крамера" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 2 · теорема о сопряжённой мере</div>
+          <h4>Наклон Крамера: мост как наклонённое блуждание</h4>
+          <p>Шаг $X_i=\mathrm{Poisson}(1)-1$. Слева — как сопряжение $\lambda\to\lambda e^\theta$ меняет распределение шага; справа — условная положительность моста и безусловная положительность наклонённого блуждания. Равенство предельное: зазор между кривыми убывает как $O(n^{-1/2})$.</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="figures/fig3_excursion_factorization_blog.png"><img src="figures/fig3_excursion_factorization_blog.png" alt="Факторизация экскурсии" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 3 · теорема об экскурсии</div>
+          <h4>Экскурсия: факторизация по среднему сечению</h4>
+          <p>Двухблочный снос $(+c,-c)$ даёт траекторию-«горб». Слева — выборки моста и типичное сечение $S_m=k$; справа — вероятность экскурсии для всего моста против произведения половин $q_1q_2$ и предела $q^2$.</p>
+        </div>
+      </figure>
+      <figure class="fig">
+        <a href="figures/fig10_large_dev_exit_blog.png"><img src="figures/fig10_large_dev_exit_blog.png" alt="Выход ниже нуля при большом уклоне" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 10 · большие уклонения</div>
+          <h4>Выход ниже нуля — в начале траектории</h4>
+          <p>Шаг $X_i=\mathrm{Poisson}(1)-2$, конец $k=\theta n$. Условный мост растёт со скоростью $\theta$; если он и уходит ниже нуля, то только в первые шаги. Справа — точная $\mathbb{P}(\tau\ge t\mid S_n=k)$, где $\tau$ — последний момент ниже нуля: хвост убывает экспоненциально.</p>
+        </div>
+      </figure>
+    </div>
+
+    <h3>Сублинейный снос · <code>simpler_drift</code></h3>
+    <div class="gallery">
+      <figure class="fig">
+        <a href="figures/fig4_drift_scaling_blog.png"><img src="figures/fig4_drift_scaling_blog.png" alt="Масштабирование сноса" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 4 · условие на среднее</div>
+          <h4>Масштабирование сублинейного сноса</h4>
+          <p>Профили $\mu_{n,i}=c\,i\,n^{\alpha-1}$ после деления на $n^\alpha$ ложатся на прямую $i/n$. Справа — точная вероятность положительности моста при $k\approx\mu_{n,n}$ и её наклон $n^{\alpha-1}$.</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="figures/fig5_sublinear_heatmap_blog.png"><img src="figures/fig5_sublinear_heatmap_blog.png" alt="Карта вероятности по альфа и n" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 5 · карта точных значений</div>
+          <h4>Карта точной положительности по $(\alpha,n)$</h4>
+          <p>Каждая клетка — отдельная динамическая программа. Вероятность убывает по $n$ при фиксированном $\alpha$; линии уровня наклона $n^{\alpha-1}$ видны как параллельные диагонали. Справа — сечения.</p>
+        </div>
+      </figure>
+    </div>
+
+    <h3>Эрдёш—Реньи · <code>erdos_renyi_explainer</code></h3>
+    <div class="gallery">
+      <figure class="fig">
+        <a href="figures/fig6_graph_gallery_blog.png"><img src="figures/fig6_graph_gallery_blog.png" alt="Галерея графов вокруг порога" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 6 · порог связности</div>
+          <h4>Галерея $G(n,p)$ вокруг порога</h4>
+          <p>Три режима: $0{,}5\,p_c$ (мелкие компоненты), $p_c$ (гигантская компонента уже есть, связности ещё нет) и $1{,}6\,p_c$ (граф почти наверняка связен).</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="figures/fig7_exploration_front_blog.png"><img src="figures/fig7_exploration_front_blog.png" alt="Фронт обхода графа" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 7 · процесс активных вершин</div>
+          <h4>Фронт обхода и линия нулевого сноса</h4>
+          <p>$A_{t+1}=A_t-1+\operatorname{Bin}(n-t-A_t,p)$ в коридоре $0\le A_t\le n-t$. Линия $a=n-t-1/p$ отделяет вымирание $(c<1)$ от роста гигантской компоненты $(c>1)$.</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="figures/fig8_poisson_bridge_blog.png"><img src="figures/fig8_poisson_bridge_blog.png" alt="Пуассоновский мост" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 8 · пуассонизация</div>
+          <h4>Пуассоновский мост и вероятность экскурсии</h4>
+          <p>Точные выборки моста одним вызовом <code>multinomial</code> при $\lambda_t=q(1-p)^{t-1}$. Справа — точная вероятность экскурсии из ДП по пуассоновским весам против Монте-Карло.</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="figures/fig9_connectivity_gumbel_blog.png"><img src="figures/fig9_connectivity_gumbel_blog.png" alt="Связность и предел Гумбеля" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">рис. 9 · предельный закон</div>
+          <h4>Связность и предел $e^{-e^{-c}}$</h4>
+          <p>Точная $P_n(p)$ для растущих $n$ при $p=(\log n+c)/n$ коллапсирует на $e^{-e^{-c}}$; ромбы — точка $p_c=\log n/n$ на оси $p$.</p>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="card" id="interactive">
+    <h2>Интерактивные опыты</h2>
+    <p>
+      Те же формулы, но посчитанные в браузере на JavaScript: ползунки меняют
+      $n$, снос, барьер и число выборок, а картинка пересчитывается без
+      перезагрузки. Генератор случайных чисел детерминированный, поэтому при
+      одном наборе параметров результат воспроизводится.
+    </p>
+    <div class="gallery">
+      <figure class="fig">
+        <a href="rec_struct.html"><img src="figures/fig1_typical_bridge_blog.png" alt="Структура моста" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">интерактив · <code>rec_struct</code></div>
+          <h4>Структура моста</h4>
+          <p>Типичный мост с барьером, наклон Крамера на пуассоновском шаге, факторизация экскурсии и выход ниже нуля при большом уклоне. Четыре опыта, все значения точные.</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="simpler_drift.html"><img src="figures/fig4_drift_scaling_blog.png" alt="Сублинейный снос" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">интерактив · <code>simpler_drift</code></div>
+          <h4>Сублинейный снос</h4>
+          <p>Профиль среднего, свободные траектории, условная и безусловная положительность, карта точных вероятностей по $(\alpha,n)$.</p>
+        </div>
+      </figure>
+
+      <figure class="fig">
+        <a href="erdos_renyi.html"><img src="figures/fig6_graph_gallery_blog.png" alt="Эрдёш—Реньи" loading="lazy"></a>
+        <div class="body">
+          <div class="tagline">интерактив · <code>erdos_renyi</code></div>
+          <h4>Эрдёш—Реньи</h4>
+          <p>Галерея графов, фронт обхода, пуассоновский мост и точная связность с коллапсом на $e^{-e^{-c}}$.</p>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="card" id="exact">
+    <h2>Что именно считается</h2>
+    <p>
+      Везде, где это возможно, вместо Монте-Карло используется точная динамика
+      по $(i,h)$: распределение моста хранится как матрица весов, строки
+      нормируются на максимум, а множители копятся в логарифме — иначе
+      $2^{-n}$ уходит в машинный ноль. Поэтому вероятности вида
+      $10^{-25}$ на рис. 9 не «шумят», а являются точными значениями.
+    </p>
+    <div class="formula">
+      $$W_i(h)=p_i\,W_{i-1}(h-1)+(1-p_i)\,W_{i-1}(h+1),\qquad
+        \mathbb{P}(S_i>r,\ i&lt;n\mid S_n=k)=\frac{W^{(r)}_n(k)}{W_n(k)}.$$
+    </div>
+    <p>
+      Для графа пуассонизация даёт
+      $\lambda_t=q(1-p)^{t-1}$ и полиномиальный мост; вероятность экскурсии —
+      та же динамика по пуассоновским весам $w_t(j)=\lambda_t^j/j!$, а
+      связность равна
+      $\left(1-(1-p)^{n-1}\right)^{n-1}\mathbb{P}(\text{экскурсия})$.
+      В опыте с наклоном Крамера шаг $X_i=\mathrm{Poisson}(1)-1$: та же
+      динамика по $(i,h)$, только вместо двух слагаемых — свёртка с
+      пуассоновским ядром (хвост отброшен при массе $&lt;10^{-15}$).
+      Ядро на Python — <code>common/walks.py</code>,
+      <code>common/poisson.py</code> и <code>common/erdos.py</code>;
+      их точные JavaScript-аналоги для сайта — <code>docs/assets/walks.js</code>,
+      <code>poisson_walks.js</code> и <code>erdos.js</code>.
+      Совпадение Python и JS проверено до $10^{-12}$ по абсолютной ошибке.
+    </p>
+    <p class="small">
+      Формулировки теорем и все константы — в статьях репозитория
+      (<code>rec_struct</code>, <code>simpler_drift</code>,
+      <code>erdos_renyi_explainer</code>); здесь они не пересказываются
+      дословно, а показываются численно.
+    </p>
+  </section>
+
+  <section class="card" id="files">
+    <h2>Файлы и сборка</h2>
+    <ul>
+      <li><code>figures/fig1…fig10*.py</code> — по одному скрипту на фигуру, у каждого есть <code>build()</code>.</li>
+      <li><code>common/</code> — точные ядра, оформление и пресеты размеров.</li>
+      <li><code>out/</code> — готовые PDF, PNG (300 dpi) и SVG в трёх пресетах.</li>
+      <li><code>make_all.py</code> — пересобрать всё и прогнать проверки; <code>qa.py</code> — проверки без визуального просмотра.</li>
+      <li><code>docs/</code> — этот сайт; публикуется из папки <code>docs/</code> ветки <code>main</code>.</li>
+    </ul>
+    <pre>cd viz
+python -m venv .venv &amp;&amp; . .venv/bin/activate
+pip install -r requirements.txt
+python make_all.py          # все фигуры + QA
+python make_all.py fig3 fig9  # только выбранные</pre>
+    <p class="small">
+      Зависимости зафиксированы: <code>plotly==5.24.1</code> и
+      <code>kaleido==0.2.1</code> (собственный headless-браузер, системный
+      Chrome не нужен), а также <code>numpy</code>, <code>scipy</code>,
+      <code>pillow</code>.
+    </p>
+  </section>
+
+  <footer>
+    <p>
+      Репозиторий: <code>bridge_and_excursion</code>. Страницы используют
+      Plotly.js 2.35.2 и KaTeX 0.16.9 с CDN; при отсутствии сети графики не
+      построятся, но текст и формулы останутся читаемыми.
+    </p>
+  </footer>
+</main>
+
+<script>
+  T.math();
+</script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Эрдёш—Реньи · мосты и экскурсии</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="assets/theme.js"></script>
+<script src="assets/rng.js"></script>
+<script src="assets/erdos.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="index.html">мосты и экскурсии <span>·</span> визуализации</a>
+    <nav class="nav">
+      <a href="index.html">Обзор</a>
+      <a href="rec_struct.html">Структура моста</a>
+      <a href="simpler_drift.html">Сублинейный снос</a>
+      <a href="erdos_renyi.html" class="active">Эрдёш—Реньи</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <h1>Эрдёш—Реньи: обход, пуассоновский мост, связность</h1>
+    <p class="lede">
+      Связность случайного графа сводится к вероятности того, что обход не
+      вымрет. Обход — это блуждание с шагами $\pm1$; при пуассонизации оно
+      становится мостом, а его экскурсия считается точно.
+    </p>
+    <p class="meta">$G(n,p)$ · фронт обхода · мультиномиальный мост · предел $e^{-e^{-c}}$</p>
+  </div>
+
+  <p>
+    Граф $G(n,p)$: каждая из $\binom{n}{2}$ пар соединена независимо с
+    вероятностью $p$. Обход в ширину от одной вершины описывается числом
+    активных вершин $A_t$:
+  </p>
+  <div class="formula">
+    $$A_{t+1} = A_t - 1 + \operatorname{Bin}\!\left(n - t - A_t,\ p\right),
+      \qquad A_0 = 1 .$$
+  </div>
+  <p>
+    Вершина $t$ обрабатывается на шаге $t$; каждая из ещё не открытых вершин
+    присоединяется независимо. Граф связен тогда и только тогда, когда обход
+    открыл все вершины, то есть $A_t > 0$ до самого конца и $A_T = 0$.
+    Порог связности — $p_c = \log n / n$.
+  </p>
+
+  <!-- ============================================================ 3.1 -->
+  <section class="card" id="gallery">
+    <h2><span class="num">3.1</span>Галерея $G(n,p)$ вокруг порога</h2>
+    <p>
+      Один и тот же генератор при трёх разных $p$: ниже порога граф распадается
+      на мелкие компоненты, на пороге появляется гигантская компонента, выше
+      порога граф связен. Цвет вершины — её компонента связности; жирные рёбра
+      принадлежат гигантской компоненте.
+    </p>
+    <div class="controls" id="ctl-gallery" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); display:grid;">
+      <div class="ctl">
+        <label for="g-n">вершин <i>n</i> <output id="g-n-out">24</output></label>
+        <input id="g-n" type="range" min="16" max="40" step="1" value="24">
+      </div>
+      <div class="ctl">
+        <label for="g-c">множитель <i>p / p<sub>c</sub></i> <output id="g-c-out">1,00</output></label>
+        <input id="g-c" type="range" min="0.3" max="2" step="0.05" value="1" data-type="float" data-fmt="2">
+      </div>
+      <div class="ctl">
+        <label for="g-seed">зерно <output id="g-seed-out">1</output></label>
+        <input id="g-seed" type="range" min="1" max="50" step="1" value="1">
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:16px;">
+      <div>
+        <div class="plot" id="plot-g-low"></div>
+        <p class="small" id="cap-g-low" style="text-align:center; margin:0;"></p>
+      </div>
+      <div>
+        <div class="plot" id="plot-g-crit"></div>
+        <p class="small" id="cap-g-crit" style="text-align:center; margin:0;"></p>
+      </div>
+      <div>
+        <div class="plot" id="plot-g-high"></div>
+        <p class="small" id="cap-g-high" style="text-align:center; margin:0;"></p>
+      </div>
+    </div>
+    <div class="readout" style="margin-top:14px;">
+      <div><b id="g-pc">—</b><span>p<sub>c</sub> = log n / n</span></div>
+      <div><b id="g-giant">—</b><span>доля гиганта при p = p<sub>c</sub></span></div>
+      <div><b id="g-edges">—</b><span>рёбер при p = p<sub>c</sub></span></div>
+    </div>
+    <div class="status" id="g-status"></div>
+    <div class="legend-note">
+      Раскладка вершин — пружинная (силы отталкивания и притяжения по рёбрам),
+      начальное положение — окружность; при одном и том же зерне картинка
+      воспроизводится. Компоненты считаются системой непересекающихся множеств.
+    </div>
+  </section>
+
+  <!-- ============================================================ 3.2 -->
+  <section class="card" id="front">
+    <h2><span class="num">3.2</span>Фронт обхода и линия нулевого сноса</h2>
+    <p>
+      При $p = c/n$ средний шаг фронта равен
+      $\mathbf{E}[A_{t+1} - A_t] = p\,(n-t) - 1 - p A_t$, поэтому линия
+      $a = n - t - 1/p$ разделяет два режима: ниже неё фронт в среднем растёт,
+      выше — вымирает.
+    </p>
+    <div class="formula">
+      $$A_{t+1} - A_t = \operatorname{Bin}\!\left(n - t - A_t,\ p\right) - 1,
+        \qquad \mathbf{E}\Delta A_t = p\,(n - t - A_t) - 1 .$$
+    </div>
+    <div class="split">
+      <div class="stack">
+        <div class="plot tall" id="plot-front"></div>
+        <div class="legend-note">
+          Серый пунктир — коридор $0 \le A_t \le n-t$; коричневая линия —
+          нулевой снос $a = n-t-1/p$. При $c&lt;1$ фронт быстро вымирает, при
+          $c&gt;1$ открывает положительную долю вершин, при $c=1$ задерживается
+          на масштабе $n^{2/3}$.
+        </div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-front">
+          <div class="ctl">
+            <label for="f-n">вершин <i>n</i> <output id="f-n-out">400</output></label>
+            <input id="f-n" type="range" min="100" max="800" step="50" value="400">
+          </div>
+          <div class="ctl">
+            <label for="f-c">интенсивность <i>c</i>, <i>p = c/n</i> <output id="f-c-out">1,00</output></label>
+            <input id="f-c" type="range" min="0.4" max="2.2" step="0.05" value="1" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="f-runs">прогонов <output id="f-runs-out">12</output></label>
+            <input id="f-runs" type="range" min="4" max="30" step="2" value="12">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="f-conn">—</b><span>связных прогонов</span></div>
+          <div><b id="f-disc">—</b><span>открыто вершин</span></div>
+          <div><b id="f-steps">—</b><span>шагов обхода</span></div>
+        </div>
+        <div class="status" id="f-status"></div>
+        <div class="legend-note">
+          Прогоны независимы, каждая траектория — один вызов точного
+          биномиального генератора. «Открыто вершин» — среднее по прогонам,
+          знаменатель — $n$.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 3.3 -->
+  <section class="card" id="poisson">
+    <h2><span class="num">3.3</span>Пуассоновский мост и точная экскурсия</h2>
+    <p>
+      Пусть $X_1,\dots,X_{n-1}$ независимы и пуассоновские с
+      $\lambda_t = q\,(1-p)^{t-1}$. При условии $\sum X_t = n-1$ их
+      распределение — полиномиальное, поэтому мост
+      $S_k = \sum_{t\le k}(X_t - 1)$ выбирается одним вызовом
+      мультиномиального генератора, без сэмплирования с отвержением.
+    </p>
+    <div class="formula">
+      $$\lambda_t = q\,(1-p)^{t-1},\qquad q = \frac{(n-1)p}{1-(1-p)^{n-1}},
+        \qquad (X_1,\dots,X_{n-1}) \sim \operatorname{Mult}\!\left(n-1,\
+        \frac{\lambda}{\sum\lambda}\right).$$
+    </div>
+    <div class="split">
+      <div class="stack">
+        <div class="plot" id="plot-pb-paths"></div>
+        <div class="plot" id="plot-pb-curve"></div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-poisson">
+          <div class="ctl">
+            <label for="q-n">длина <i>n</i> <output id="q-n-out">120</output></label>
+            <input id="q-n" type="range" min="40" max="240" step="10" value="120">
+          </div>
+          <div class="ctl">
+            <label for="q-c">интенсивность <i>C</i>, <i>p = C/n</i> <output id="q-c-out">1,00</output></label>
+            <input id="q-c" type="range" min="0.5" max="1.6" step="0.05" value="1" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="q-m">траекторий <output id="q-m-out">30</output></label>
+            <input id="q-m" type="range" min="8" max="60" step="2" value="30">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="q-exact">—</b><span>P(экскурсия), ДП</span></div>
+          <div><b id="q-mc">—</b><span>Монте-Карло</span></div>
+          <div><b id="q-se">—</b><span>стандартная ошибка</span></div>
+        </div>
+        <div class="status" id="q-status"></div>
+        <div class="legend-note">
+          Нижняя панель: точная вероятность экскурсии (сплошная) и оценка по
+          выборкам пуассоновского моста (точки с интервалом $\pm2\sigma$).
+          Обе величины — для одного и того же $C$ и разных $n$.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 3.4 -->
+  <section class="card" id="connectivity">
+    <h2><span class="num">3.4</span>Связность и предел $e^{-e^{-c}}$</h2>
+    <p>
+      Точная вероятность связности распадается на множитель появления
+      гигантской компоненты и вероятность экскурсии обхода:
+    </p>
+    <div class="formula">
+      $$P_n(p) = \left(1-(1-p)^{n-1}\right)^{n-1}\cdot
+        \mathbb{P}\!\left(S_k \ge 0,\ 1\le k\le n-2 \ \middle|\ S_{n-1}=0\right).$$
+    </div>
+    <p>
+      При $p = (\log n + c)/n$ выполнено $P_n(p)\to e^{-e^{-c}}$ при
+      $n\to\infty$. Кривые для растущих $n$ должны ложиться на этот предел —
+      это и есть коллапс по $c$; правая панель показывает тот же порог в
+      координатах $(p, P_n)$.
+    </p>
+    <div class="split">
+      <div class="stack">
+        <div class="plot tall" id="plot-conn-collapse"></div>
+        <div class="plot" id="plot-conn-threshold"></div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-conn">
+          <div class="ctl">
+            <label for="c-nmax">максимальное <i>n</i>
+              <output id="c-nmax-out">200</output></label>
+            <input id="c-nmax" type="range" min="50" max="200" step="50" value="200">
+          </div>
+          <div class="ctl">
+            <label for="c-half">окно по <i>c</i> <output id="c-half-out">3,0</output></label>
+            <input id="c-half" type="range" min="1.5" max="4" step="0.5" value="3" data-type="float" data-fmt="1">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="c-pc">—</b><span>P<sub>n</sub> в точке p<sub>c</sub></span></div>
+          <div><b id="c-limit">—</b><span>e<sup>−1</sup></span></div>
+          <div><b id="c-diff">—</b><span>max |ДП − предел|</span></div>
+        </div>
+        <div class="status" id="c-status"></div>
+        <div class="legend-note">
+          Точные значения считаются динамикой по пуассоновским весам
+          $w_t(j)=\lambda_t^j/j!$; асимптотика $e^{-e^{-c}}$ нарисована
+          отдельной жирной линией. Пересчёт сетки занимает до пары секунд.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Расчёты: <code>common/erdos.py</code> (Python, статические фигуры)
+      и <code>docs/assets/erdos.js</code> (эта страница). Статические
+      версии опытов — рис. 6–9 в <code>out/</code>.
+    </p>
+    <p><a href="index.html">← ко всем сюжетам</a></p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------ 3.1 */
+
+  function components(n, edges) {
+    var par = new Int32Array(n);
+    for (var i = 0; i < n; i++) par[i] = i;
+    function find(x) {
+      while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; }
+      return x;
+    }
+    edges.forEach(function (e) {
+      var a = find(e[0]), b = find(e[1]);
+      if (a !== b) par[a] = b;
+    });
+    var roots = {}, comp = new Int32Array(n), sizes = [];
+    for (var v = 0; v < n; v++) {
+      var r = find(v);
+      if (!(r in roots)) { roots[r] = sizes.length; sizes.push(0); }
+      comp[v] = roots[r];
+      sizes[comp[v]]++;
+    }
+    var giant = 0;
+    for (var c = 1; c < sizes.length; c++) if (sizes[c] > sizes[giant]) giant = c;
+    return { comp: comp, sizes: sizes, giant: giant };
+  }
+
+  function sampleGraph(n, p, rng) {
+    var edges = [];
+    for (var u = 0; u < n; u++) {
+      for (var v = u + 1; v < n; v++) {
+        if (rng.next() < p) edges.push([u, v]);
+      }
+    }
+    var c = components(n, edges);
+    return { n: n, p: p, edges: edges, comp: c.comp, sizes: c.sizes, giant: c.giant };
+  }
+
+  /* Пружинная раскладка: отталкивание всех пар, притяжение по рёбрам. */
+  function layoutGraph(g, rng) {
+    var n = g.n, x = new Float64Array(n), y = new Float64Array(n), i;
+    for (i = 0; i < n; i++) {
+      var a = 2 * Math.PI * i / n;
+      x[i] = Math.cos(a) + 0.02 * rng.normal();
+      y[i] = Math.sin(a) + 0.02 * rng.normal();
+    }
+    var k = 1.15 / Math.sqrt(n);
+    var deg = new Float64Array(n);
+    g.edges.forEach(function (e) { deg[e[0]]++; deg[e[1]]++; });
+    for (var it = 0; it < 340; it++) {
+      var fx = new Float64Array(n), fy = new Float64Array(n);
+      for (var u = 0; u < n; u++) {
+        for (var v = u + 1; v < n; v++) {
+          var dx = x[u] - x[v], dy = y[u] - y[v];
+          var d2 = dx * dx + dy * dy + 1e-4;
+          var d = Math.sqrt(d2);
+          var f = k * k / d2;
+          fx[u] += f * dx / d; fy[u] += f * dy / d;
+          fx[v] -= f * dx / d; fy[v] -= f * dy / d;
+        }
+      }
+      g.edges.forEach(function (e) {
+        var dx = x[e[0]] - x[e[1]], dy = y[e[0]] - y[e[1]];
+        var d = Math.sqrt(dx * dx + dy * dy + 1e-6);
+        var f = d / k;
+        fx[e[0]] -= f * dx / d; fy[e[0]] -= f * dy / d;
+        fx[e[1]] += f * dx / d; fy[e[1]] += f * dy / d;
+      });
+      var cool = 0.12 * (1 - it / 380);
+      for (i = 0; i < n; i++) {
+        x[i] += cool * (-x[i] + fx[i]);
+        y[i] += cool * (-y[i] + fy[i]);
+      }
+    }
+    var mx = 1e-9;
+    for (i = 0; i < n; i++) mx = Math.max(mx, Math.abs(x[i]), Math.abs(y[i]));
+    for (i = 0; i < n; i++) { x[i] /= mx; y[i] /= mx; }
+    return { x: x, y: y };
+  }
+
+  var PALETTE = ["#2d6cdf", "#e67e22", "#1f9e89", "#c0392b", "#7d3cbf",
+                 "#b7950b", "#546e7a", "#d81b60", "#00838f"];
+
+  function drawGraph(id, g) {
+    var pos = layoutGraph(g, new RNG(900 + g.n + Math.round(1000 * g.p)));
+    var ex = [], ey = [], gx = [], gy = [], i;
+    g.edges.forEach(function (e) {
+      var a = e[0], b = e[1];
+      var inGiant = g.comp[a] === g.giant && g.comp[b] === g.giant;
+      var X = inGiant ? gx : ex, Y = inGiant ? gy : ey;
+      X.push(pos.x[a], pos.x[b], null);
+      Y.push(pos.y[a], pos.y[b], null);
+    });
+    var vx = Array.from(pos.x), vy = Array.from(pos.y);
+    var colors = [], sizes = [], text = [], hover = [];
+    for (i = 0; i < g.n; i++) {
+      colors.push(PALETTE[g.comp[i] % PALETTE.length]);
+      sizes.push(g.comp[i] === g.giant ? 11 : 7.5);
+      text.push(String(i));
+      hover.push("вершина " + i + "<br>компонента " + g.comp[i] +
+        "<br>размер " + g.sizes[g.comp[i]]);
+    }
+    var traces = [];
+    if (ex.length) traces.push({
+      x: ex, y: ey, mode: "lines", line: { color: "rgba(120,132,148,0.35)", width: 1 },
+      hoverinfo: "skip", showlegend: false
+    });
+    if (gx.length) traces.push({
+      x: gx, y: gy, mode: "lines", line: { color: "rgba(45,108,223,0.55)", width: 1.5 },
+      hoverinfo: "skip", showlegend: false
+    });
+    traces.push({
+      x: vx, y: vy, mode: "markers", text: text, hovertext: hover,
+      hoverinfo: "text", marker: {
+        size: sizes, color: colors, line: { color: "white", width: 1.4 }
+      }, showlegend: false
+    });
+    var lo = -1.18, hi = 1.18;
+    T.plot(id, traces, {
+      margin: { l: 8, r: 8, t: 8, b: 8 },
+      xaxis: { visible: false, range: [lo, hi], fixedrange: true },
+      yaxis: { visible: false, range: [lo, hi], fixedrange: true, scaleanchor: "x" },
+      showlegend: false, hovermode: "closest"
+    });
+  }
+
+  var ctlG = document.getElementById("ctl-gallery");
+  var statusG = document.getElementById("g-status");
+
+  function gallery(v) {
+    var n = v["g-n"], c = v["g-c"], seed = v["g-seed"];
+    var pc = Math.log(n) / n;
+    document.getElementById("g-pc").textContent = pc.toFixed(3).replace(".", ",");
+    var mult = [0.6, 1.0, 1.6], ids = ["low", "crit", "high"], caps = [];
+    var gcrit = null;
+    mult.forEach(function (m, idx) {
+      var p = m * c * pc;
+      var g = sampleGraph(n, p, new RNG(seed * 7919 + idx * 101 + n));
+      drawGraph("plot-g-" + ids[idx], g);
+      var top = 0;
+      g.sizes.forEach(function (s) { if (s > top) top = s; });
+      caps.push("p = " + p.toFixed(3).replace(".", ",") + " · гигант " +
+        top + " / " + n + " · компонент " + g.sizes.length);
+      if (idx === 1) gcrit = g;
+    });
+    caps.forEach(function (t, idx) {
+      document.getElementById("cap-g-" + ids[idx]).textContent = t;
+    });
+    var top = 0;
+    gcrit.sizes.forEach(function (s) { if (s > top) top = s; });
+    document.getElementById("g-giant").textContent = T.num(top / n, 2);
+    document.getElementById("g-edges").textContent = gcrit.edges.length;
+    statusG.textContent = "n = " + n + ", p_c = " + pc.toFixed(3).replace(".", ",") +
+      ", зерно " + seed;
+  }
+
+  /* ------------------------------------------------------------ 3.2 */
+
+  var ctlF = document.getElementById("ctl-front");
+  var statusF = document.getElementById("f-status");
+
+  function front(v) {
+    var n = v["f-n"], c = v["f-c"], runs = v["f-runs"];
+    var p = c / n;
+    var rng = new RNG(31337 + n + Math.round(c * 1000));
+    var traces = [], conn = 0, disc = 0, steps = 0;
+    for (var s = 0; s < runs; s++) {
+      var res = Erdos.bfsFront(n, p, rng);
+      var t = Array.from({ length: res.front.length }, function (_, i) { return i; });
+      traces.push({
+        x: t, y: res.front, mode: "lines",
+        line: { color: T.colors.path, width: 1.1 },
+        hoverinfo: "skip", showlegend: false
+      });
+      if (res.connected) conn++;
+      disc += res.discovered;
+      steps += res.steps;
+    }
+    var tt = [], corridor = [], zero = [];
+    for (var j = 0; j <= n; j++) {
+      tt.push(j);
+      corridor.push(n - j);
+      zero.push(n - j - 1 / p);
+    }
+    traces.push({
+      x: tt, y: corridor, mode: "lines", name: "коридор n − t",
+      line: { color: "rgba(120,132,148,0.65)", width: 1.2, dash: "dash" }
+    });
+    traces.push({
+      x: tt, y: zero, mode: "lines", name: "нулевой снос n − t − 1/p",
+      line: { color: "#8d6e63", width: 1.8, dash: "dot" }
+    });
+
+    document.getElementById("f-conn").textContent = conn + " / " + runs;
+    document.getElementById("f-disc").textContent = (disc / runs).toFixed(0) + " / " + n;
+    document.getElementById("f-steps").textContent = (steps / runs).toFixed(0);
+    statusF.textContent = "p = c/n = " + p.toFixed(4).replace(".", ",") +
+      ", c = " + T.num(c, 2) + (c < 1 ? " (докритический режим)" :
+      (c > 1.15 ? " (надкритический режим)" : " (вблизи критики)"));
+
+    T.plot("plot-front", traces, {
+      xaxis: { title: { text: "Шаг t" }, range: [0, n] },
+      yaxis: { title: { text: "Активных вершин Aₜ" }, range: [0, n] }
+    });
+  }
+
+  /* ------------------------------------------------------------ 3.3 */
+
+  var ctlQ = document.getElementById("ctl-poisson");
+  var statusQ = document.getElementById("q-status");
+
+  function excursionMC(n, p, samples, rng, seed) {
+    var paths = Erdos.poissonBridge(n, p, samples, rng);
+    var ok = 0;
+    paths.forEach(function (path) {
+      var good = true;
+      for (var k = 1; k <= n - 2; k++) if (path[k] < 0) { good = false; break; }
+      if (good) ok++;
+    });
+    return { phat: ok / samples, se: Math.sqrt((ok / samples) * (1 - ok / samples) / samples) };
+  }
+
+  function poissonPage(v) {
+    var n = v["q-n"], C = v["q-c"], m = v["q-m"];
+    var p = C / n;
+    var rng = new RNG(500 + n + Math.round(C * 100));
+    var paths = Erdos.poissonBridge(n, p, m, rng);
+    var x = Array.from({ length: n + 1 }, function (_, i) { return i; });
+    var traces = paths.map(function (path) {
+      return {
+        x: x, y: Array.from(path), mode: "lines",
+        line: { color: T.colors.path, width: 1 }, hoverinfo: "skip", showlegend: false
+      };
+    });
+    traces.push({
+      x: [0, n], y: [0, 0], mode: "lines", name: "S = 0",
+      line: { color: T.colors.zero, width: 1.3, dash: "dash" }
+    });
+    T.plot("plot-pb-paths", traces, {
+      xaxis: { title: { text: "Шаг k" } },
+      yaxis: { title: { text: "Sₖ" } },
+      margin: { l: 62, r: 18, t: 20, b: 96 }
+    });
+
+    var exact = Erdos.excursionProbability(n, p);
+    var mc = excursionMC(n, p, 2000, new RNG(77 + n), 0);
+    document.getElementById("q-exact").textContent = T.num(exact, 4);
+    document.getElementById("q-mc").textContent = T.num(mc.phat, 4);
+    document.getElementById("q-se").textContent = T.num(mc.se, 4);
+    statusQ.textContent = "n = " + n + ", p = " + p.toFixed(4).replace(".", ",") +
+      ", выборок Монте-Карло: 2000";
+
+    var sizes = [30, 50, 80, 120, 180, 240];
+    var ex = [], ph = [], err = [], up = [], dn = [];
+    sizes.forEach(function (nn, idx) {
+      var pp = C / nn;
+      var e = Erdos.excursionProbability(nn, pp);
+      var r = excursionMC(nn, pp, 1500, new RNG(1000 + idx * 17 + nn), 0);
+      ex.push(e); ph.push(r.phat); err.push(2 * r.se);
+      up.push(r.phat + 2 * r.se); dn.push(Math.max(0, r.phat - 2 * r.se));
+    });
+    var ymin = Math.min.apply(null, ex.concat(dn));
+    var ymax = Math.max.apply(null, ex.concat(up));
+    T.plot("plot-pb-curve", [
+      {
+        x: sizes, y: ex, mode: "lines+markers", name: "точная P(экскурсия)",
+        line: { color: T.colors.good, width: 2.2 }, marker: { size: 5 }
+      },
+      {
+        x: sizes, y: ph, mode: "markers", name: "Монте-Карло, 1500 выборок",
+        marker: { size: 7, color: T.colors.accent, symbol: "circle-open" },
+        error_y: {
+          type: "data", array: err, visible: true,
+          color: T.colors.accent, thickness: 1, width: 3
+        }
+      }
+    ], {
+      xaxis: Object.assign({ title: { text: "n" }, type: "log" },
+        T.plainLog(sizes[0], sizes[sizes.length - 1])),
+      yaxis: Object.assign({ title: { text: "Вероятность" }, type: "log" },
+        T.plainLog(ymin, ymax)),
+      margin: { l: 68, r: 18, t: 20, b: 96 }
+    });
+  }
+
+  /* ------------------------------------------------------------ 3.4 */
+
+  var ctlC = document.getElementById("ctl-conn");
+  var statusC = document.getElementById("c-status");
+
+  function connPage(v) {
+    var nmax = v["c-nmax"], half = v["c-half"];
+    var nsAll = [10, 20, 50, 100, 200];
+    var ns = nsAll.filter(function (n) { return n <= nmax; });
+    var cs = [];
+    for (var c = -half; c <= half + 1e-9; c += 2 * half / 12) cs.push(c);
+
+    statusC.textContent = "считаю точные значения…";
+    var traces = [], diff = 0;
+    ns.forEach(function (n, idx) {
+      var ys = cs.map(function (cc) {
+        return Erdos.connectivity(n, (Math.log(n) + cc) / n);
+      });
+      ys.forEach(function (y, j) {
+        var lim = Math.exp(-Math.exp(-cs[j]));
+        diff = Math.max(diff, Math.abs(y - lim));
+      });
+      traces.push({
+        x: cs, y: ys, mode: "lines", name: "n = " + n,
+        line: { color: T.seq[idx % T.seq.length], width: 1.9 }
+      });
+    });
+    traces.push({
+      x: cs, y: cs.map(function (cc) { return Math.exp(-Math.exp(-cc)); }),
+      mode: "lines", name: "e^{−e^{−c}}",
+      line: { color: T.colors.dark, width: 2.6, dash: "dash" }
+    });
+    T.plot("plot-conn-collapse", traces, {
+      xaxis: { title: { text: "c" } },
+      yaxis: { title: { text: "Pₙ((log n + c)/n)" }, range: [-0.02, 1.02] },
+      margin: { l: 66, r: 18, t: 20, b: 96 }
+    });
+
+    /* правая панель: порог по p */
+    var ptraces = [];
+    ns.forEach(function (n, idx) {
+      var pmax = Math.min(0.6, 4 * Math.log(n) / n);
+      var pts = [];
+      for (var j = 0; j <= 15; j++) pts.push(0.004 + (pmax - 0.004) * j / 15);
+      ptraces.push({
+        x: pts, y: pts.map(function (p) { return Erdos.connectivity(n, p); }),
+        mode: "lines", name: "n = " + n,
+        line: { color: T.seq[idx % T.seq.length], width: 1.9 }
+      });
+      var pc = Math.log(n) / n;
+      ptraces.push({
+        x: [pc], y: [Erdos.connectivity(n, pc)], mode: "markers",
+        marker: { size: 7, symbol: "diamond", color: T.seq[idx % T.seq.length] },
+        showlegend: false, hovertemplate: "p_c = " + pc.toFixed(4) + "<extra></extra>"
+      });
+    });
+    T.plot("plot-conn-threshold", ptraces, {
+      xaxis: { title: { text: "p" } },
+      yaxis: { title: { text: "Pₙ(p)" }, type: "log" },
+      margin: { l: 66, r: 18, t: 20, b: 96 }
+    });
+
+    var top = ns[ns.length - 1];
+    var atPc = Erdos.connectivity(top, Math.log(top) / top);
+    document.getElementById("c-pc").textContent = T.num(atPc, 3);
+    document.getElementById("c-limit").textContent = T.num(Math.exp(-1), 3);
+    document.getElementById("c-diff").textContent = diff.toExponential(1).replace(".", ",");
+    statusC.textContent = "n ∈ {" + ns.join(", ") + "}, точек по c: " + cs.length +
+      "; ромбы на нижней панели — p = log n / n";
+  }
+
+  /* ---------------------------------------------------------- запуск */
+
+  T.bind(ctlG, gallery).run();
+  T.bind(ctlF, front).run();
+  T.bind(ctlQ, poissonPage).run();
+
+  var bound = T.bind(ctlC, function (v) {
+    setTimeout(function () { connPage(v); }, 30);
+  });
+  setTimeout(bound.run, 120);
+
+  T.math();
+})();
+</script>
+</body>
+</html>

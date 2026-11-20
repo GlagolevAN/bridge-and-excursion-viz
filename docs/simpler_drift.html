@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сублинейный снос · мосты и экскурсии</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="assets/theme.js"></script>
+<script src="assets/rng.js"></script>
+<script src="assets/walks.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="index.html">мосты и экскурсии <span>·</span> визуализации</a>
+    <nav class="nav">
+      <a href="index.html">Обзор</a>
+      <a href="rec_struct.html">Структура моста</a>
+      <a href="simpler_drift.html" class="active">Сублинейный снос</a>
+      <a href="erdos_renyi.html">Эрдёш—Реньи</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <h1>Сублинейный снос: почему барьер решается на первых шагах</h1>
+    <p class="lede">
+      Снос $\mu_{n,i} = c\,i\,n^{\alpha-1}$ растёт, но медленнее, чем $i$: на
+      каждом отдельном шаге он стремится к нулю. Как это отражается на
+      вероятности остаться выше уровня $r$ при условии на конец?
+    </p>
+    <p class="meta">$\alpha \in (1/2, 1)$ · точные динамические программы · три интерактивных опыта</p>
+  </div>
+
+  <p>
+    Пусть $X_i \in \{+1,-1\}$ независимы,
+    $\mathbf{E} X_i = 2p_i - 1$ и выполнено условие на среднее
+  </p>
+  <div class="formula">
+    $$c_- i\,n^{\alpha-1} \le \mu_{n,i} = \mathbf{E} S_{n,i} \le c_+ i\,n^{\alpha-1},
+      \qquad 1 \le i \le n,\quad \alpha \in (1/2,1).$$
+  </div>
+  <p>
+    Тогда $\mathbf{E} S_{n,n} \asymp n^{\alpha}$, а приращение сноса за один шаг
+    $\asymp n^{\alpha-1} \to 0$. Стандартное отклонение при этом $\asymp\sqrt{i}$,
+    поэтому флуктуации на коротких горизонтах сравнимы с накопленным сносом.
+  </p>
+
+  <!-- ============================================================ 2.1 -->
+  <section class="card" id="profile">
+    <h2><span class="num">2.1</span>Профиль среднего и типичная траектория</h2>
+    <p>
+      После нормировки на $n^{\alpha}$ все профили среднего ложатся на одну
+      прямую $\mu_{n,i}/n^{\alpha} = c\,(i/n)$ — это ровно содержание условия
+      на среднее. Само блуждание при этом выглядит как диффузия с очень малым
+      сносом: траектория много раз пересекает свой средний уровень.
+    </p>
+    <div class="split">
+      <div class="stack">
+        <div class="plot" id="plot-profile"></div>
+        <div class="plot" id="plot-walk"></div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-profile">
+          <div class="ctl">
+            <label for="d-alpha">показатель <i>α</i> <output id="d-alpha-out">0,70</output></label>
+            <input id="d-alpha" type="range" min="0.52" max="0.95" step="0.01" value="0.7" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="d-n">длина <i>n</i> <output id="d-n-out">800</output></label>
+            <input id="d-n" type="range" min="200" max="2000" step="100" value="800">
+          </div>
+          <div class="ctl">
+            <label for="d-c">константа <i>c</i> <output id="d-c-out">1,00</output></label>
+            <input id="d-c" type="range" min="0.4" max="2" step="0.05" value="1" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="d-m">траекторий <output id="d-m-out">12</output></label>
+            <input id="d-m" type="range" min="3" max="30" step="1" value="12">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="d-drift">—</b><span>снос за шаг</span></div>
+          <div><b id="d-mu">—</b><span>E Sₙ</span></div>
+          <div><b id="d-sd">—</b><span>√n</span></div>
+        </div>
+        <div class="status" id="d-status"></div>
+        <div class="legend-note">
+          Верхний график: профили среднего для нескольких $n$ при текущем
+          $\alpha$ (совпадают после нормировки). Нижний: свободные траектории
+          без условия на конец.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 2.2 -->
+  <section class="card" id="bridge">
+    <h2><span class="num">2.2</span>Условная и безусловная положительность</h2>
+    <p>
+      Для моста с $k \approx \mu_{n,n}$ и фиксированного $r$ условная
+      вероятность положительности асимптотически совпадает с безусловной
+      вероятностью для первых $T_n$ шагов:
+    </p>
+    <div class="formula">
+      $$\mathbb{P}\!\left(S_i > r,\ 1\le i < n \mid S_{n,n} = k\right)
+        - \mathbb{P}\!\left(S_i > r,\ 1 \le i \le T_n\right) \to 0,
+        \qquad n\to\infty,$$
+    </div>
+    <p class="small">
+      $T_n \to \infty$, $T_n = n^{2(1-\alpha)}$ — так что «хвост» моста не
+      влияет на барьер. Ниже обе величины считаются точно: левая — динамикой
+      по $(i,h)$ с условием $S_n = k$, правая — той же динамикой без условия
+      на конец, но с поглощающим барьером.
+    </p>
+    <div class="split">
+      <div>
+        <div class="plot tall" id="plot-prob"></div>
+        <div class="legend-note">
+          Обе кривые: точные вероятности. Пунктир — наклон $n^{\alpha-1}$
+          (показатель подобран по последней точке).
+        </div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-prob">
+          <div class="ctl">
+            <label for="p-alpha">показатель <i>α</i> <output id="p-alpha-out">0,70</output></label>
+            <input id="p-alpha" type="range" min="0.52" max="0.95" step="0.01" value="0.7" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="p-c">константа <i>c</i> <output id="p-c-out">1,00</output></label>
+            <input id="p-c" type="range" min="0.4" max="2" step="0.05" value="1" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="p-r">барьер <i>r</i> <output id="p-r-out">0</output></label>
+            <input id="p-r" type="range" min="-2" max="1" step="1" value="0">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="p-bridge">—</b><span>мост, n = 2000</span></div>
+          <div><b id="p-uncond">—</b><span>безусловная</span></div>
+          <div><b id="p-exp">—</b><span>показатель наклона</span></div>
+        </div>
+        <div class="status" id="p-status"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 2.3 -->
+  <section class="card" id="map">
+    <h2><span class="num">2.3</span>Карта точной вероятности по (α, n)</h2>
+    <p>
+      Сетка считается заново при каждом изменении $c$: в каждой точке —
+      точная вероятность $\mathbb{P}(S_i>0,\ i&lt;n \mid S_n=k)$ при
+      $k \approx c\,n^{\alpha}$. Диагональные линии уровня отвечают степенному
+      закону $n^{\alpha-1}$.
+    </p>
+    <div class="split">
+      <div>
+        <div class="plot tall" id="plot-map"></div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-map">
+          <div class="ctl">
+            <label for="m-c">константа <i>c</i> <output id="m-c-out">1,00</output></label>
+            <input id="m-c" type="range" min="0.4" max="2" step="0.05" value="1" data-type="float" data-fmt="2">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="m-min">—</b><span>min P</span></div>
+          <div><b id="m-max">—</b><span>max P</span></div>
+        </div>
+        <div class="status" id="m-status"></div>
+        <div class="legend-note">
+          Сетка: $\alpha \in [0.55, 0.95]$, $n \in [64, 1536]$; каждая клетка —
+          отдельная динамическая программа, восемь шагов сетки по $n$.
+          На больших $n$ пересчёт занимает секунду-две.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Расчёты: <code>common/walks.py</code> и <code>docs/assets/walks.js</code>.
+      Статические версии — рис. 4–5 в <code>out/</code>.
+    </p>
+    <p><a href="index.html">← ко всем сюжетам</a></p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------- 2.1 */
+  var ctlD = document.getElementById("ctl-profile");
+  var statusD = document.getElementById("d-status");
+
+  function profile(v) {
+    var alpha = v["d-alpha"], n = v["d-n"], c = v["d-c"], m = v["d-m"];
+    var drift = c * Math.pow(n, alpha - 1);
+    document.getElementById("d-drift").textContent = drift.toFixed(4).replace(".", ",");
+    document.getElementById("d-mu").textContent = (drift * n).toFixed(0);
+    document.getElementById("d-sd").textContent = Math.sqrt(n).toFixed(0);
+    statusD.textContent = "α = " + T.num(alpha, 2) + ", n = " + n + ", c = " + T.num(c, 2);
+
+    var leftover = [];
+    var xs = [];
+    for (var i = 0; i <= 200; i++) xs.push(i / 200);
+
+    [200, 500, 1000, 2000].forEach(function (nn, idx) {
+      var ys = [];
+      for (var j = 0; j <= 200; j++) {
+        var t = j / 200;
+        ys.push(c * t * Math.pow(nn, alpha - 1) * nn / Math.pow(nn, alpha));
+      }
+      leftover.push({
+        x: xs, y: ys, mode: "lines", name: "n = " + nn,
+        line: { color: T.seq[idx], width: 1.8, dash: nn === n ? "solid" : "dot" }
+      });
+    });
+    leftover.push({
+      x: [0, 1], y: [0, c], mode: "lines", name: "c · i/n",
+      line: { color: T.colors.dark, width: 1.2, dash: "dash" }
+    });
+    T.plot("plot-profile", leftover, {
+      xaxis: { title: { text: "i / n" } },
+      yaxis: { title: { text: "μₙ,ᵢ / n^α" } }
+    });
+
+    /* свободные траектории */
+    var rng = new RNG(2024 + n + Math.round(alpha * 1000));
+    var p = Walks.sublinearProfile(n, c, alpha);
+    var traces = [];
+    var mean = new Float64Array(n + 1);
+    for (var s = 0; s < m; s++) {
+      var y = new Int32Array(n + 1);
+      var h = 0;
+      for (var k = 1; k <= n; k++) {
+        h += rng.next() < p[k - 1] ? 1 : -1;
+        y[k] = h;
+        mean[k] += h / m;
+      }
+      traces.push({
+        x: xs.length ? Array.from({ length: n + 1 }, function (_, q) { return q; }) : [],
+        y: Array.from(y), mode: "lines",
+        line: { color: T.colors.path, width: 1 }, hoverinfo: "skip", showlegend: false
+      });
+    }
+    traces.push({
+      x: Array.from({ length: n + 1 }, function (_, q) { return q; }),
+      y: Array.from(mean), mode: "lines",
+      line: { color: T.colors.good2, width: 2.2 }, name: "среднее по выборке"
+    });
+    T.plot("plot-walk", traces, {
+      xaxis: { title: { text: "Шаг i" } },
+      yaxis: { title: { text: "Sᵢ" } }
+    });
+  }
+
+  /* ---------------------------------------------------------- 2.2 */
+  var ctlP = document.getElementById("ctl-prob");
+  var statusP = document.getElementById("p-status");
+
+  function probability(v) {
+    var alpha = v["p-alpha"], c = v["p-c"], r = v["p-r"];
+    var sizes = [64, 96, 128, 200, 300, 450, 700, 1000, 1400, 2000];
+    var bridge = [], uncond = [];
+    sizes.forEach(function (n) {
+      var p = Walks.sublinearProfile(n, c, alpha);
+      var mu = 0;
+      for (var i = 0; i < n; i++) mu += 2 * p[i] - 1;
+      var k = Walks.parityK(n, mu);
+      bridge.push(Walks.bridgeProb(p, k, r));
+      uncond.push(Walks.positivity(p, r));
+    });
+
+    document.getElementById("p-bridge").textContent = T.num(bridge[bridge.length - 1], 4);
+    document.getElementById("p-uncond").textContent = T.num(uncond[uncond.length - 1], 4);
+    var slope = Math.log(bridge[bridge.length - 1] / bridge[0]) /
+      Math.log(sizes[sizes.length - 1] / sizes[0]);
+    document.getElementById("p-exp").textContent = T.num(slope, 2) + " (α−1 = " + T.num(alpha - 1, 2) + ")";
+    statusP.textContent = "n = 64…2000, r = " + r;
+
+    var guide = bridge[0] * Math.pow(sizes.map(function (n) { return n / sizes[0]; }), alpha - 1);
+    var ymin = Math.min.apply(null, bridge.concat(uncond));
+    var ymax = Math.max.apply(null, bridge.concat(uncond));
+    T.plot("plot-prob", [
+      {
+        x: sizes, y: bridge, mode: "lines+markers", name: "мост: P(Sᵢ > r | Sₙ = k)",
+        line: { color: T.colors.good, width: 2.2 }, marker: { size: 5 }
+      },
+      {
+        x: sizes, y: uncond, mode: "markers", name: "безусловная: P(Sᵢ > r, i ≤ n)",
+        marker: { size: 8, color: T.colors.accent, symbol: "circle-open" }
+      },
+      {
+        x: sizes, y: guide, mode: "lines", name: "наклон n^{α−1}",
+        line: { color: T.colors.grey, width: 1.3, dash: "dot" }
+      }
+    ], {
+      xaxis: Object.assign({ title: { text: "n" }, type: "log" },
+        T.plainLog(sizes[0], sizes[sizes.length - 1])),
+      yaxis: Object.assign({ title: { text: "Вероятность" }, type: "log" },
+        T.plainLog(ymin, ymax))
+    });
+  }
+
+  /* ---------------------------------------------------------- 2.3 */
+  var ctlM = document.getElementById("ctl-map");
+  var statusM = document.getElementById("m-status");
+
+  function map(v) {
+    var c = v["m-c"];
+    var alphas = [0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95];
+    var ns = [64, 128, 256, 512, 768, 1024, 1536];
+    var z = [], lo = Infinity, hi = -Infinity;
+    alphas.forEach(function (alpha) {
+      var row = [];
+      ns.forEach(function (n) {
+        var p = Walks.sublinearProfile(n, c, alpha);
+        var mu = 0;
+        for (var i = 0; i < n; i++) mu += 2 * p[i] - 1;
+        var k = Walks.parityK(n, mu);
+        var val = Walks.bridgeProb(p, k, 0);
+        row.push(val);
+        if (val < lo) lo = val;
+        if (val > hi) hi = val;
+      });
+      z.push(row);
+    });
+    document.getElementById("m-min").textContent = T.num(lo, 4);
+    document.getElementById("m-max").textContent = T.num(hi, 4);
+    statusM.textContent = "сетка пересчитана: " + alphas.length + "×" + ns.length + " точных значений";
+
+    T.plot("plot-map", [{
+      type: "heatmap", z: z, x: ns.map(Math.log10), y: alphas,
+      colorscale: [[0, "#12355b"], [0.35, "#2d6cdf"], [0.7, "#1f9e89"], [1, "#f4c95d"]],
+      colorbar: { title: { text: "P", side: "right" }, thickness: 12, len: 0.9 },
+      hovertemplate: "α = %{y:.2f}<br>n = 10^%{x:.3f}<br>P = %{z:.4f}<extra></extra>"
+    }], {
+      xaxis: {
+        title: { text: "lg n" }, tickvals: ns.map(Math.log10),
+        ticktext: ns.map(String)
+      },
+      yaxis: { title: { text: "α" } },
+      margin: { l: 62, r: 18, t: 20, b: 96 }
+    });
+  }
+
+  T.bind(ctlD, profile).run();
+  T.bind(ctlP, probability).run();
+  T.bind(ctlM, map).run();
+  T.math();
+})();
+</script>
+</body>
+</html>

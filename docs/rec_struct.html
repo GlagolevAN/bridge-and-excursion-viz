@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Структура моста · мосты и экскурсии</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="assets/theme.js"></script>
+<script src="assets/rng.js"></script>
+<script src="assets/walks.js"></script>
+<script src="assets/poisson_walks.js"></script>
+<script src="assets/poisson_shift_walks.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="index.html">мосты и экскурсии <span>·</span> визуализации</a>
+    <nav class="nav">
+      <a href="index.html">Обзор</a>
+      <a href="rec_struct.html" class="active">Структура моста</a>
+      <a href="simpler_drift.html">Сублинейный снос</a>
+      <a href="erdos_renyi.html">Эрдёш—Реньи</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <h1>Структура моста: снос, наклон Крамера, экскурсия</h1>
+    <p class="lede">
+      Что делает типичная траектория, если известен её конец? Как вероятность
+      остаться положительной выражается через наклон Крамера и почему
+      экскурсия распадается на две независимые половины.
+    </p>
+    <p class="meta">Шаги ±1 (1.1, 1.3), пуассоновские −1 (1.2) и −2 (1.4) · точные динамические программы · четыре интерактивных опыта</p>
+  </div>
+
+  <p>
+    В опытах 1.1 и 1.3 рассматривается блуждание $S_0 = 0$,
+    $S_i = X_1 + \dots + X_i$, где $X_i \in \{+1,-1\}$ независимы и
+    $\mathbb{P}(X_i = +1) = p_i$. Профиль $p_1,\dots,p_n$ задаёт пошаговый
+    снос $\mu_i = \mathbf{E} X_i = 2p_i - 1$. Условный закон при $S_n = k$ —
+    <em>мост</em>. Для шагов ±1 он считается точно: динамика по $(i, h)$
+    без сэмплирования с отвержением. В опыте 1.2 шаг другой —
+    $X_i\sim\mathrm{Poisson}(1)-1$; там та же динамика по $(i,h)$, но с
+    усечённым пуассоновским хвостом шага. В опыте 1.4 шаг
+    $X_i\sim\mathrm{Poisson}(1)-2$: снос отрицательный, а конец — в зоне
+    больших уклонений.
+  </p>
+
+  <div class="formula">
+    $$W_i(h) = p_i\,W_{i-1}(h-1) + (1-p_i)\,W_{i-1}(h+1),\qquad
+      \mathbb{P}(S_i > r,\ i&lt;n \mid S_n = k) = \frac{W^{(r)}_n(k)}{W_n(k)} .$$
+  </div>
+
+  <p class="small">
+    Верхний индекс $(r)$ означает, что при $i &lt; n$ обнулены все состояния
+    $h \le r$. Каждая строка нормируется на максимум, а множители копятся в
+    логарифме — иначе $2^{-n}$ уходит в машинный ноль.
+  </p>
+
+  <!-- ============================================================ 1.1 -->
+  <section class="card" id="typical">
+    <h2><span class="num">1.1</span>Типичный мост при постоянном сносе</h2>
+    <p>
+      При $p_i = (1+c)/2$ мост $S_n = k$ с $k \approx cn$ идёт почти по прямой
+      $i \mapsto ki/n$: снос под условием на конец перестаёт быть случайным.
+      Полоса на рисунке — поточечные квантили 5 % и 95 % точного условного
+      распределения, а не разброс выборки.
+    </p>
+    <div class="split">
+      <div class="stack">
+        <div class="plot tall" id="plot-typical"></div>
+        <div class="legend-note">
+          Тонкие линии — независимые точные выборки моста. Красная пунктирная
+          линия — запрет $S_i = r$; точка — конец $S_n = k$. Зелёная линия —
+          условное среднее $\mathbf{E}[S_i \mid S_n = k]$: оно плавно приходит
+          ровно в $k$, без скачка на последнем шаге. Перетаскивайте
+          ползунки: правый столбец пересчитывается без перезагрузки страницы.
+        </div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-typical">
+          <div class="ctl">
+            <label for="t-n">длина <i>n</i> <output id="t-n-out">200</output></label>
+            <input id="t-n" type="range" min="60" max="600" step="2" value="200">
+          </div>
+          <div class="ctl">
+            <label for="t-c">снос <i>c</i> <output id="t-c-out">0,30</output></label>
+            <input id="t-c" type="range" min="0" max="0.6" step="0.01" value="0.3" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="t-f">конец <i>k/n</i> <output id="t-f-out">0,30</output></label>
+            <input id="t-f" type="range" min="0" max="0.8" step="0.01" value="0.3" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="t-r">запрет <i>S<sub>i</sub> &gt; r</i> <output id="t-r-out">−1</output></label>
+            <input id="t-r" type="range" min="-4" max="3" step="1" value="-1">
+          </div>
+          <div class="ctl">
+            <label for="t-m">выборок <output id="t-m-out">24</output></label>
+            <input id="t-m" type="range" min="4" max="60" step="2" value="24">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="t-prob">—</b><span>точная вероятность</span></div>
+          <div><b id="t-k">—</b><span>конец k</span></div>
+          <div><b id="t-mean">—</b><span>средний конец</span></div>
+        </div>
+        <div class="status" id="t-status"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 1.2 -->
+  <section class="card" id="cramer">
+    <h2><span class="num">1.2</span>Наклон Крамера: мост = наклонённое блуждание</h2>
+    <p>
+      Здесь шаг устроен иначе: $X_i = Y_i - 1$, где
+      $Y_i \sim \mathrm{Poisson}(1)$ независимы. Снос равен нулю, но шаг
+      не ограничен сверху, поэтому и мост, и его наклон выглядят содержательнее,
+      чем у шагов $\pm1$. Условие на конец — снова смена меры, и наклонённый
+      шаг опять пуассоновский:
+    </p>
+    <div class="formula">
+      $$\mathbf{E}e^{\theta X_i} = e^{\lambda(e^\theta-1)-\theta},\qquad
+        X_i^{(\theta)} \sim \mathrm{Poisson}\!\left(\lambda e^\theta\right) - 1,$$
+      $$\mathbf{E}_\theta X_i = \lambda e^\theta - 1 = \frac{k}{n}
+        \quad\Longleftrightarrow\quad
+        \lambda e^\theta = 1 + \frac{k}{n}\quad(\lambda = 1).$$
+    </div>
+    <p class="small">
+      То есть наклонённое блуждание — это $\mathrm{Poisson}(1+k/n)-1$:
+      его шаг зависит только от $k/n$. Верхний график — распределение шага
+      до и после наклона при выбранном $k/n$; средний — условная
+      положительность моста и безусловная положительность наклонённого
+      блуждания; нижний — модуль их разности.
+    </p>
+    <p class="small">
+      Равенство предельное: в теореме о сопряжённой мере в
+      <code>rec_struct</code> это двойной предел (сначала $n\to\infty$,
+      затем $T\to\infty$), а при конечном $n$ кривые расходятся на
+      $O(n^{-1/2})$ — ползунок $n$ показывает, как зазор убывает. Для шагов
+      $\pm1$ такой картинки не вышло бы: по теореме о баллотировке при
+      $k>0$ условная вероятность равна ровно $k/n$ при любом сносе, а
+      наклонённое $p'=(1+k/n)/2$ тоже зависит только от $k/n$ — обе кривые
+      визуально сливаются с прямой $y=k/n$, и ползунок сноса ничего не меняет.
+    </p>
+    <div class="split">
+      <div class="stack">
+        <div class="plot" id="plot-pmf"></div>
+        <div class="plot" id="plot-cramer"></div>
+        <div class="plot short" id="plot-cramer-diff"></div>
+        <div class="legend-note">
+          Все кривые — точные динамические программы по $(i,h)$, не
+          Монте-Карло; отброшен только пуассоновский хвост шага
+          (масса $&lt; 10^{-15}$).
+        </div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-cramer">
+          <div class="ctl">
+            <label for="k-n">длина <i>n</i> <output id="k-n-out">400</output></label>
+            <input id="k-n" type="range" min="120" max="400" step="8" value="400">
+          </div>
+          <div class="ctl">
+            <label for="k-f">выделенный конец <i>k/n</i> <output id="k-f-out">0,56</output></label>
+            <input id="k-f" type="range" min="0" max="1.2" step="0.02" value="0.56" data-type="float" data-fmt="2">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="k-theta">—</b><span>θ</span></div>
+          <div><b id="k-lam">—</b><span>λ′ = λe<sup>θ</sup></span></div>
+          <div><b id="k-diff">—</b><span>max |разность|</span></div>
+        </div>
+        <div class="status" id="k-status"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 1.3 -->
+  <section class="card" id="excursion">
+    <h2><span class="num">1.3</span>Экскурсия: факторизация по среднему сечению</h2>
+    <p>
+      Двухблочный снос: $+c$ до $m = n/2$ и $-c$ после. Типичная траектория —
+      «горб». Теорема утверждает, что при условии $S_m = k$ половины
+      асимптотически независимы, поэтому
+    </p>
+    <div class="formula">
+      $$\mathbb{P}\!\left(S_i>0,\ i&lt;n \mid S_n=0\right)
+        \;\approx\; q_1\,q_2,\qquad
+        q_1 = \mathbb{P}\!\left(S_i>0,\ i&lt;m \mid S_m = k\right),\quad
+        q_2 = \mathbb{P}\!\left(S_i>0,\ m&lt;i&lt;n \mid S_m = k\right).$$
+    </div>
+    <div class="split">
+      <div class="stack">
+        <div class="plot" id="plot-exc-paths"></div>
+        <div class="plot" id="plot-exc-curve"></div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-exc">
+          <div class="ctl">
+            <label for="e-n">длина <i>n</i> <output id="e-n-out">240</output></label>
+            <input id="e-n" type="range" min="80" max="600" step="4" value="240">
+          </div>
+          <div class="ctl">
+            <label for="e-c">амплитуда <i>c</i> <output id="e-c-out">0,30</output></label>
+            <input id="e-c" type="range" min="0.1" max="0.5" step="0.01" value="0.3" data-type="float" data-fmt="2">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="e-full">—</b><span>весь мост</span></div>
+          <div><b id="e-prod">—</b><span>q₁·q₂</span></div>
+          <div><b id="e-k">—</b><span>типичное k</span></div>
+        </div>
+        <div class="status" id="e-status"></div>
+        <div class="legend-note">
+          Верхний график — точные выборки экскурсии при текущих $n$, $c$.
+          Нижний — сравнение полного моста и произведения половин при
+          фиксированном $c$ и разных $n$ (маркер отмечает текущее $n$).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 1.4 -->
+  <section class="card" id="large-dev">
+    <h2><span class="num">1.4</span>Большие уклонения: выход ниже нуля — в начале</h2>
+    <p>
+      Шаг здесь другой: $X_i = Y_i - 2$, $Y_i \sim \mathrm{Poisson}(1)$;
+      снос равен $-1$, дисперсия $1$. Конец лежит в зоне больших уклонений:
+      $S_n = k$, $k/n = \theta > 0$. Преобразование Крамера снова даёт
+      пуассоновский шаг, и наклонённое блуждание имеет положительный снос:
+    </p>
+    <div class="formula">
+      $$\mathbf{E}e^{\alpha X_i} = e^{\lambda(e^\alpha-1)-2\alpha},\qquad
+        X_i^{(\alpha)} \sim \mathrm{Poisson}\!\left(\lambda e^\alpha\right) - 2,
+        \qquad \lambda' = \theta + 2,$$
+      $$\mathbf{E}_\theta X_i = \lambda' - 2 = \theta = \frac{k}{n}.$$
+    </div>
+    <p class="small">
+      При фиксированном $k/n$ условный закон моста не зависит от $\lambda$:
+      отношение правдоподобий двух пуассоновских моделей постоянно на
+      событии $\{S_n = k\}$, поэтому картинка определяется только $\theta$.
+    </p>
+    <p>
+      Поэтому условный мост выглядит как наклонённое блуждание с
+      положительным сносом $\theta$: он растёт. Если траектория всё-таки
+      уходит ниже нуля, то только в начале — после последнего такого
+      момента $\tau$ она остаётся неотрицательной. Поздний выход означал бы
+      спуск с высоты порядка $t$, то есть большое уклонение влево, поэтому
+      $\mathbb{P}(\tau \ge t \mid S_n = k)$ убывает экспоненциально по $t$.
+    </p>
+    <div class="split">
+      <div class="stack">
+        <div class="plot tall" id="plot-ld-paths"></div>
+        <div class="plot" id="plot-ld-zoom"></div>
+        <div class="plot short" id="plot-ld-tail"></div>
+        <div class="legend-note">
+          Верхний график — точные выборки моста при текущих $n$ и $\theta$.
+          Средний — первые 40 шагов; красным выделен участок до последнего
+          выхода ниже нуля, точка — сам момент $\tau$. Нижний — точная
+          $\mathbb{P}(\tau \ge t \mid S_n = k)$ из динамики по $(i,h)$,
+          не Монте-Карло; пунктир — медиана $\tau$ при условии, что выход был.
+        </div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-ld">
+          <div class="ctl">
+            <label for="l-n">длина <i>n</i> <output id="l-n-out">400</output></label>
+            <input id="l-n" type="range" min="160" max="480" step="8" value="400">
+          </div>
+          <div class="ctl">
+            <label for="l-theta">конец <i>k/n</i> <output id="l-theta-out">1,00</output></label>
+            <input id="l-theta" type="range" min="0.4" max="1.8" step="0.02" value="1" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="l-m">выборок <output id="l-m-out">16</output></label>
+            <input id="l-m" type="range" min="4" max="32" step="2" value="16">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="ld-dip">—</b><span>P(выход) точно</span></div>
+          <div><b id="ld-med">—</b><span>медиана τ при выходе</span></div>
+          <div><b id="ld-mc">—</b><span>выборок с выходом</span></div>
+        </div>
+        <div class="status" id="ld-status"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Точные расчёты: <code>common/walks.py</code>, <code>common/poisson.py</code>
+      и <code>common/poisson_shift.py</code>
+      (Python, статические фигуры) и <code>docs/assets/walks.js</code>,
+      <code>docs/assets/poisson_walks.js</code>,
+      <code>docs/assets/poisson_shift_walks.js</code> (эта страница).
+      Статические версии опытов — рис. 1–3 и 10 в <code>out/</code>.
+    </p>
+    <p><a href="index.html">← ко всем сюжетам</a></p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------- 1.1 */
+  var ctlT = document.getElementById("ctl-typical");
+  var statusT = document.getElementById("t-status");
+
+  function typical(v) {
+    var n = v["t-n"], c = v["t-c"], frac = v["t-f"], r = v["t-r"], m = v["t-m"];
+    var p = Walks.constProfile(n, c);
+    var k = Walks.parityK(n, frac * n);
+    var prob = Walks.bridgeProb(p, k, r);
+    document.getElementById("t-k").textContent = k;
+    document.getElementById("t-prob").textContent = T.num(prob, 3);
+
+    if (!(prob > 1e-12)) {
+      Plotly.purge("plot-typical");
+      statusT.className = "status err";
+      statusT.textContent = "при таких n, k, r условная вероятность равна нулю — " +
+        "сдвиньте конец k/n или ослабьте запрет r";
+      document.getElementById("t-mean").textContent = "—";
+      return;
+    }
+    statusT.className = "status";
+    statusT.textContent = "пересчитано: n = " + n + ", k = " + k + ", r = " + r;
+
+    var dp = Walks.bridgeRows(p, k, r);
+    var st = Walks.bridgeStats(dp, p, k, r, 0.05, 0.95);
+    var rng = new RNG(1000 + n + Math.round(c * 100) + r);
+    var paths = Walks.sampleBridge(p, k, r, m, rng, dp);
+    var x = [];
+    for (var i = 0; i <= n; i++) x.push(i);
+
+    var traces = [];
+    paths.forEach(function (path) {
+      traces.push({
+        x: x, y: Array.from(path), mode: "lines",
+        line: { color: T.colors.path, width: 1 },
+        hoverinfo: "skip", showlegend: false
+      });
+    });
+    traces.push({
+      x: x, y: Array.from(st.hi), mode: "lines",
+      line: { color: "rgba(45,108,223,0.0)", width: 0 },
+      hoverinfo: "skip", showlegend: false
+    });
+    traces.push({
+      x: x, y: Array.from(st.lo), mode: "lines",
+      fill: "tonexty", fillcolor: T.colors.band,
+      line: { color: "rgba(45,108,223,0.0)", width: 0 },
+      name: "квантили 5–95 %", hoverinfo: "skip"
+    });
+    traces.push({
+      x: x, y: Array.from(st.mean), mode: "lines",
+      line: { color: T.colors.good2, width: 2.4 }, name: "средний путь"
+    });
+    traces.push({
+      x: [0, n], y: [r, r], mode: "lines",
+      line: { color: T.colors.bad, width: 1.2, dash: "dash" },
+      name: "запрет Sᵢ > r"
+    });
+    traces.push({
+      x: [n], y: [k], mode: "markers",
+      marker: { size: 8, color: T.colors.bad }, name: "конец Sₙ = k"
+    });
+
+    document.getElementById("t-mean").textContent = T.num(st.mean[n], 1);
+
+    T.plot("plot-typical", traces, {
+      xaxis: { title: { text: "Шаг i", standoff: 12 } },
+      yaxis: { title: { text: "Sᵢ" } },
+      margin: { b: 128 },
+      legend: { y: -0.26 }
+    });
+  }
+
+  /* ---------------------------------------------------------- 1.2 */
+  var ctlK = document.getElementById("ctl-cramer");
+  var statusK = document.getElementById("k-status");
+
+  function cramer(v) {
+    var n = v["k-n"], frac = v["k-f"];
+    var lam = new Float64Array(n);
+    lam.fill(1);                              // X_i = Poisson(1) - 1
+    var kh = Math.round(frac * n);
+    var lamTilt = 1 + kh / n;                 // λ′ при λ = 1
+    var kmax = Math.round(1.25 * n) + 4;
+    var bridge = PoissonWalks.bridgeCurve(n, 1, 0, kmax);
+
+    var xs = [], pb = [], pt = [], pd = [];
+    var dmax = 0;
+    for (var t = 0.1; t <= 1.1401; t += 0.08) {
+      var k = Math.round(t * n);
+      var a = bridge[k];
+      var b = PoissonWalks.positivity(PoissonWalks.tiltedProfile(lam, n, k), 0);
+      xs.push(k / n); pb.push(a); pt.push(b);
+      var d = Math.abs(a - b);
+      pd.push(d);
+      if (d > dmax) dmax = d;
+    }
+    var orig = PoissonWalks.positivity(lam, 0);   // без наклона: одно число
+
+    document.getElementById("k-theta").textContent = T.num(Math.log(lamTilt), 3);
+    document.getElementById("k-lam").textContent = T.num(lamTilt, 3);
+    document.getElementById("k-diff").textContent = dmax.toExponential(1).replace(".", ",");
+    statusK.textContent = "n = " + n + ", точек по k/n: " + xs.length +
+      ", без наклона: P = " + T.num(orig, 3);
+
+    /* --- распределение шага до и после наклона --- */
+    var jm = -1, jM = 9, js = [];
+    for (var j = jm; j <= jM; j++) js.push(j);
+    var p0 = Array.from(PoissonWalks.stepPmf(1.0, jm, jM));
+    var p1 = Array.from(PoissonWalks.stepPmf(lamTilt, jm, jM));
+    T.plot("plot-pmf", [
+      {
+        x: js, y: p0, type: "bar", name: "до наклона: λ = 1",
+        marker: { color: T.colors.grey, opacity: 0.55 }
+      },
+      {
+        x: js, y: p1, type: "bar", name: "после: λ′ = " + T.num(lamTilt, 2),
+        marker: { color: T.colors.accent, opacity: 0.8 }
+      }
+    ], {
+      barmode: "overlay",
+      xaxis: { title: { text: "Значение шага j = Xᵢ" }, dtick: 1 },
+      yaxis: { title: { text: "P(Xᵢ = j)" } },
+      margin: { l: 62, r: 18, t: 20, b: 96 }
+    });
+
+    /* --- положительность --- */
+    T.plot("plot-cramer", [
+      {
+        x: xs, y: pb, mode: "lines+markers", name: "мост: P(Sᵢ > 0, i < n | Sₙ = k)",
+        line: { color: T.colors.good, width: 2.2 }, marker: { size: 4 }
+      },
+      {
+        x: xs, y: pt, mode: "lines", name: "наклонённое: P_θ(Sᵢ > 0, i < n)",
+        line: { color: T.colors.accent, width: 1.9, dash: "dash" }
+      },
+      {
+        x: [0.06, 1.16], y: [orig, orig], mode: "lines",
+        name: "исходное: P(Sᵢ > 0, i < n)",
+        line: { color: T.colors.grey, width: 1.4, dash: "dot" }
+      },
+      {
+        x: [kh / n], y: [bridge[kh]], mode: "markers",
+        marker: { size: 8, color: T.colors.dark, symbol: "circle-open", line: { width: 2 } },
+        name: "выделенный k/n"
+      }
+    ], {
+      xaxis: { title: { text: "k / n" } },
+      yaxis: { title: { text: "Вероятность" }, range: [0, 1] }
+    });
+
+    /* --- разность --- */
+    T.plot("plot-cramer-diff", [
+      {
+        x: xs, y: pd, mode: "lines+markers", name: "|мост − наклонённое|",
+        line: { color: T.colors.violet, width: 1.8 }, marker: { size: 4 }
+      }
+    ], {
+      xaxis: { title: { text: "k / n" } },
+      yaxis: {
+        title: { text: "Разность" },
+        range: [0, Math.max(0.004, 1.15 * dmax)]
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------- 1.3 */
+  var ctlE = document.getElementById("ctl-exc");
+  var statusE = document.getElementById("e-status");
+
+  function twoBlock(n, c) { return Walks.twoBlockProfile(n, c); }
+
+  function excursion(v) {
+    var n = v["e-n"], c = v["e-c"];
+    var m = Math.floor(n / 2);
+    var p = twoBlock(n, c);
+    var mu = 0;
+    for (var i = 0; i < m; i++) mu += 2 * p[i] - 1;
+    var ktyp = Walks.parityK(m, mu);
+
+    var prob = Walks.bridgeProb(p, 0, 0);
+    var q1 = Walks.bridgeProb(p.subarray(0, m), ktyp, 0);
+    var q2 = Walks.bridgeProb(reverse(p.subarray(m)), ktyp, 0);
+
+    document.getElementById("e-full").textContent = T.num(prob, 4);
+    document.getElementById("e-prod").textContent = T.num(q1 * q2, 4);
+    document.getElementById("e-k").textContent = ktyp;
+    statusE.textContent = "q₁ = " + T.num(q1, 3) + ", q₂ = " + T.num(q2, 3) +
+      ", безусловная q = " + T.num(Walks.positivity(p.subarray(0, m), 0), 3);
+
+    /* траектории */
+    var rng = new RNG(77 + n + Math.round(c * 100));
+    var paths = prob > 1e-12 ? Walks.sampleBridge(p, 0, 0, 16, rng) : [];
+    var x = [];
+    for (var j = 0; j <= n; j++) x.push(j);
+    var traces = paths.map(function (path) {
+      return {
+        x: x, y: Array.from(path), mode: "lines",
+        line: { color: T.colors.path, width: 1 },
+        hoverinfo: "skip", showlegend: false
+      };
+    });
+    traces.push({
+      x: [m, m], y: [0, ktyp], mode: "lines",
+      line: { color: T.colors.bad, width: 1.4, dash: "dash" },
+      name: "сечение Sₘ = k"
+    });
+    T.plot("plot-exc-paths", traces, {
+      xaxis: { title: { text: "Шаг i" } },
+      yaxis: { title: { text: "Sᵢ" } }
+    });
+
+    /* кривая факторизации */
+    var sizes = [40, 80, 120, 180, 260, 360, 480, 620];
+    var full = [], prod = [], uncond = [];
+    sizes.forEach(function (nn) {
+      var mm = Math.floor(nn / 2);
+      var pp = twoBlock(nn, c);
+      var s = 0;
+      for (var q = 0; q < mm; q++) s += 2 * pp[q] - 1;
+      var kk = Walks.parityK(mm, s);
+      var f = Walks.bridgeProb(pp, 0, 0);
+      var a = Walks.bridgeProb(pp.subarray(0, mm), kk, 0);
+      var b = Walks.bridgeProb(reverse(pp.subarray(mm)), kk, 0);
+      full.push(f); prod.push(a * b);
+      uncond.push(Walks.positivity(pp.subarray(0, mm), 0));
+    });
+
+    T.plot("plot-exc-curve", [
+      {
+        x: sizes, y: full, mode: "lines+markers", name: "весь мост",
+        line: { color: T.colors.good, width: 2.2 }, marker: { size: 5 }
+      },
+      {
+        x: sizes, y: prod, mode: "lines+markers", name: "q₁·q₂",
+        line: { color: T.colors.accent, width: 1.8, dash: "dash" },
+        marker: { size: 5, symbol: "square" }
+      },
+      {
+        x: sizes, y: uncond.map(function (q) { return q * q; }),
+        mode: "lines", name: "предел q²", line: { color: T.colors.grey, width: 1.4, dash: "dot" }
+      },
+      {
+        x: [n, n], y: [0, 1], mode: "lines", name: "текущее n",
+        line: { color: T.colors.violet, width: 1.0, dash: "longdash" }
+      }
+    ], {
+      xaxis: Object.assign({ title: { text: "n" }, type: "log" },
+        T.plainLog(sizes[0], sizes[sizes.length - 1])),
+      yaxis: { title: { text: "Вероятность" }, range: [0, Math.max(0.16, 1.15 * Math.max.apply(null, full))] }
+    });
+  }
+
+  /* ---------------------------------------------------------- 1.4 */
+  var ctlL = document.getElementById("ctl-ld");
+  var statusL = document.getElementById("ld-status");
+
+  function largeDev(v) {
+    var n = v["l-n"], theta = v["l-theta"], m = v["l-m"];
+    var k = Math.round(theta * n);
+    var TMAX = 40;
+    var sv = PoissonShiftWalks.tauSurvival(n, theta, TMAX);   // sv[t] = P(τ ≥ t)
+    var dip = sv[1];
+    var med = null;
+    for (var t = 1; t <= TMAX; t++) if (sv[t] <= dip / 2) { med = t; break; }
+
+    var rng = new RNG(2026 + n + Math.round(theta * 1000) + m);
+    var paths = PoissonShiftWalks.sampleBridge(n, theta, m, rng);
+    var tau = PoissonShiftWalks.tauOfPaths(paths);
+    var withDip = 0;
+    for (var q = 0; q < tau.length; q++) if (tau[q] > 0) withDip++;
+
+    document.getElementById("ld-dip").textContent = T.num(dip, 3);
+    document.getElementById("ld-med").textContent = med === null ? "—" : String(med);
+    document.getElementById("ld-mc").textContent = withDip + " / " + m;
+    statusL.textContent = "n = " + n + ", k = " + k + ", θ = " + T.num(theta, 2) +
+      "; кривая — точная динамика по (i, h), t = 1…" + TMAX;
+
+    var x = [], i;
+    for (i = 0; i <= n; i++) x.push(i);
+
+    /* --- весь мост --- */
+    var traces = paths.map(function (p) {
+      return {
+        x: x, y: Array.from(p), mode: "lines",
+        line: { color: T.colors.path, width: 1 },
+        hoverinfo: "skip", showlegend: false
+      };
+    });
+    traces.push({
+      x: [0, n], y: [0, k], mode: "lines",
+      line: { color: T.colors.dark, width: 1.2, dash: "dot" },
+      name: "наклон k/n = " + T.num(theta, 2)
+    });
+    traces.push({
+      x: [0, n], y: [0, 0], mode: "lines",
+      line: { color: T.colors.zero, width: 1.2, dash: "dash" },
+      showlegend: false
+    });
+    T.plot("plot-ld-paths", traces, {
+      xaxis: { title: { text: "Шаг i" } },
+      yaxis: { title: { text: "Sᵢ" } }
+    });
+
+    /* --- начало крупно --- */
+    var zm = Math.min(n, Math.max(40, 2 + Math.max.apply(null, Array.from(tau))));
+    var ymin = Infinity, ymax = -Infinity, j;
+    paths.forEach(function (p) {
+      for (j = 0; j <= zm; j++) {
+        if (p[j] < ymin) ymin = p[j];
+        if (p[j] > ymax) ymax = p[j];
+      }
+    });
+    traces = paths.map(function (p) {
+      return {
+        x: x.slice(0, zm + 1), y: Array.from(p.slice(0, zm + 1)),
+        mode: "lines", line: { color: T.colors.path, width: 1.2 },
+        hoverinfo: "skip", showlegend: false
+      };
+    });
+    var named = false;
+    paths.forEach(function (p, idx) {
+      var tt = tau[idx];
+      if (tt <= 0 || tt > zm) return;
+      traces.push({
+        x: x.slice(0, tt + 1), y: Array.from(p.slice(0, tt + 1)),
+        mode: "lines", line: { color: T.colors.bad, width: 2.6 },
+        name: "выход ниже нуля", showlegend: !named, hoverinfo: "skip"
+      });
+      named = true;
+      traces.push({
+        x: [tt], y: [p[tt]], mode: "markers",
+        marker: { size: 7, color: T.colors.bad, line: { color: "white", width: 1 } },
+        showlegend: false, hoverinfo: "skip"
+      });
+    });
+    traces.push({
+      x: [0, zm], y: [0, 0], mode: "lines",
+      line: { color: T.colors.zero, width: 1.2, dash: "dash" },
+      showlegend: false
+    });
+    T.plot("plot-ld-zoom", traces, {
+      xaxis: { title: { text: "Шаг i" }, range: [0, zm] },
+      yaxis: { title: { text: "Sᵢ" }, range: [ymin - 1, ymax + 2] }
+    });
+
+    /* --- хвост последнего выхода --- */
+    var ts = [], ss = [];
+    for (t = 1; t <= TMAX; t++) { ts.push(t); ss.push(sv[t]); }
+    var lo = Infinity;
+    ss.forEach(function (y) { if (y > 0 && y < lo) lo = y; });
+    if (!isFinite(lo)) lo = 1e-12;
+    var loAxis = Math.max(1e-14, lo / 3);
+    traces = [{
+      x: ts, y: ss, mode: "lines", name: "P(τ ≥ t | Sₙ = k)",
+      line: { color: T.colors.good, width: 2.2 }
+    }];
+    if (med !== null) {
+      traces.push({
+        x: [med, med], y: [loAxis, 1], mode: "lines",
+        name: "медиана τ = " + med,
+        line: { color: T.colors.violet, width: 1.2, dash: "dash" }
+      });
+    }
+    T.plot("plot-ld-tail", traces, {
+      xaxis: { title: { text: "t" }, range: [1, TMAX] },
+      yaxis: {
+        title: { text: "P(τ ≥ t | Sₙ = k)" }, type: "log",
+        range: [Math.log10(loAxis), 0.05],
+        tickvals: [1, 1e-3, 1e-6, 1e-9, 1e-12],
+        ticktext: ["1", "10⁻³", "10⁻⁶", "10⁻⁹", "10⁻¹²"]
+      }
+    });
+  }
+
+  function reverse(arr) {
+    var out = new Float64Array(arr.length);
+    for (var i = 0; i < arr.length; i++) out[i] = arr[arr.length - 1 - i];
+    return out;
+  }
+
+  T.bind(ctlT, typical).run();
+  T.bind(ctlK, cramer, 200).run();
+  T.bind(ctlE, excursion).run();
+  T.bind(ctlL, largeDev, 200).run();
+  T.math();
+})();
+</script>
+</body>
+</html>
