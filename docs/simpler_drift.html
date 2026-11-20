@@ -314,7 +314,8 @@
     var slope = Math.log(bridge[bridge.length - 1] / bridge[0]) /
       Math.log(sizes[sizes.length - 1] / sizes[0]);
     document.getElementById("p-exp").textContent = T.num(slope, 2) + " (α−1 = " + T.num(alpha - 1, 2) + ")";
-    statusP.textContent = "n = 64…2000, r = " + r;
+    statusP.textContent = "n = 64…2000, r = " + r +
+      (r >= 1 ? " · при r ≥ 1 событие невозможно уже при i = 1 (S₁ = ±1)" : "");
 
     var guide = bridge[0] * Math.pow(sizes.map(function (n) { return n / sizes[0]; }), alpha - 1);
     var ymin = Math.min.apply(null, bridge.concat(uncond));
