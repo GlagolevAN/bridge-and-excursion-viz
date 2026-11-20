@@ -45,23 +45,24 @@
   <section class="card" id="typical">
     <h2><span class="num">1.1</span>Неоднородное блуждание при типичном сносе</h2>
     <p>
-      Шаг $X_i=Y_i-1$, $Y_i\sim\mathrm{Poisson}(1+c)$, принимает значения
-      $-1,0,1,2,\dots$; его среднее равно $c$. При типичном конце
-      $k \approx cn$ мост идёт почти по прямой $i \mapsto ki/n$:
-      флуктуации не накапливаются. Полоса на рисунке — поточечные
-      квантили 5 % и 95 % точного распределения, а не разброс выборки.
+      В верхнем графике шаг однородный: $\lambda_i=1+c$ для всех $i$.
+      В нижнем — неоднородный: $\lambda_i=1+c\,w_i$, где
+      $w_i\propto(1-1/n)^{i-1}$ и $\sum w_i=n$, поэтому средний снос до
+      условия на конец тот же $c$, но сильнее в начале. У неоднородного
+      шага типичная траектория вогнута, у однородного почти прямая. Полоса —
+      поточечные квантили 5 % и 95 % точного распределения, а не разброс
+      выборки.
     </p>
     <div class="split">
       <div class="stack">
-        <div class="plot tall" id="plot-typical"></div>
+        <div class="plot" id="plot-typical-hom"></div>
+        <div class="plot" id="plot-typical-het"></div>
         <div class="legend-note">
           Тонкие линии — независимые точные выборки при условии $S_n = k$.
-          Красная пунктирная линия — уровень $r$; точка — конец $S_n = k$.
-          Шаг пуассоновский, поэтому траектория может перепрыгнуть уровень
-          $r$, и запрет при $r>0$ содержателен. Зелёная линия — условное
-          среднее $\mathbf{E}[S_i \mid S_n = k]$: оно плавно приходит ровно
-          в $k$, без скачка на последнем шаге. Перетаскивайте ползунки:
-          правый столбец пересчитывается без перезагрузки страницы.
+          Красная пунктирная линия — уровень $r$; точка — конец $S_n = k$;
+          зелёная — условное среднее. Пуассоновский шаг может перепрыгнуть
+          $r$, поэтому запрет при $r>0$ содержателен. Перетаскивайте
+          ползунки: оба графика пересчитываются без перезагрузки страницы.
         </div>
       </div>
       <div class="stack">
@@ -88,9 +89,10 @@
           </div>
         </div>
         <div class="readout">
-          <div><b id="t-prob">—</b><span>точная вероятность</span></div>
+          <div><b id="t-prob-hom">—</b><span>P, однородный</span></div>
+          <div><b id="t-prob-het">—</b><span>P, неоднородный</span></div>
           <div><b id="t-k">—</b><span>конец k</span></div>
-          <div><b id="t-mean">—</b><span>средний конец</span></div>
+          <div><b id="t-lam">—</b><span>λ неоднородного</span></div>
         </div>
         <div class="status" id="t-status"></div>
       </div>
@@ -278,30 +280,21 @@
   var ctlT = document.getElementById("ctl-typical");
   var statusT = document.getElementById("t-status");
 
-  function typical(v) {
-    var n = v["t-n"], c = v["t-c"], frac = v["t-f"], r = v["t-r"], m = v["t-m"];
-    var lam = new Float64Array(n);
-    lam.fill(1 + c);                          // X_i = Poisson(1+c) - 1
-    var k = Math.round(frac * n);
-    var prob = PoissonWalks.bridgeProb(lam, k, r);
-    document.getElementById("t-k").textContent = k;
-    document.getElementById("t-prob").textContent = T.num(prob, 3);
-
+  function drawTypicalPlot(id, lam, k, r, m, seed, title, prob) {
+    var n = lam.length;
     if (!(prob > 1e-12)) {
-      Plotly.purge("plot-typical");
-      statusT.className = "status err";
-      statusT.textContent = "при таких n, k, r условная вероятность равна нулю — " +
-        "сдвиньте конец k/n или ослабьте запрет r";
-      document.getElementById("t-mean").textContent = "—";
+      T.plot(id, [], {
+        title: { text: title + " · P ≈ 0", x: 0.01, font: { size: 13 } },
+        xaxis: { title: { text: "Шаг i", standoff: 12 } },
+        yaxis: { title: { text: "Sᵢ" } },
+        margin: { b: 60, t: 46 },
+        height: 330
+      });
       return;
     }
-    statusT.className = "status";
-    statusT.textContent = "пересчитано: n = " + n + ", k = " + k + ", r = " + r +
-      " · шаг Poisson(1+c) − 1";
-
     var dp = PoissonWalks.bridgeDP(lam, k, r, true);
     var st = PoissonWalks.bridgeStats(dp, lam, k, r, 0.05, 0.95);
-    var rng = new RNG(1000 + n + Math.round(c * 100) + r);
+    var rng = new RNG(seed);
     var paths = PoissonWalks.sampleBridge(lam, k, r, m, rng, dp);
     var x = [];
     for (var i = 0; i <= n; i++) x.push(i);
@@ -339,14 +332,51 @@
       marker: { size: 8, color: T.colors.bad }, name: "конец Sₙ = k"
     });
 
-    document.getElementById("t-mean").textContent = T.num(st.mean[n], 1);
-
-    T.plot("plot-typical", traces, {
+    T.plot(id, traces, {
+      title: { text: title, x: 0.01, font: { size: 13 } },
       xaxis: { title: { text: "Шаг i", standoff: 12 } },
       yaxis: { title: { text: "Sᵢ" } },
-      margin: { b: 128 },
-      legend: { y: -0.26 }
+      margin: { b: 104, t: 46 },
+      height: 330,
+      legend: { y: -0.22 }
     });
+  }
+
+  function typical(v) {
+    var n = v["t-n"], c = v["t-c"], frac = v["t-f"], r = v["t-r"], m = v["t-m"];
+    var k = Math.round(frac * n);
+    var lamH = new Float64Array(n);
+    lamH.fill(1 + c);
+    var lamN = PoissonWalks.erdosProfile(n, c);
+    var probH = PoissonWalks.bridgeProb(lamH, k, r);
+    var probN = PoissonWalks.bridgeProb(lamN, k, r);
+
+    document.getElementById("t-k").textContent = k;
+    document.getElementById("t-prob-hom").textContent = T.num(probH, 3);
+    document.getElementById("t-prob-het").textContent = T.num(probN, 3);
+    var lmin = Infinity, lmax = -Infinity;
+    for (var i = 0; i < n; i++) {
+      if (lamN[i] < lmin) lmin = lamN[i];
+      if (lamN[i] > lmax) lmax = lamN[i];
+    }
+    document.getElementById("t-lam").textContent =
+      T.num(lmin, 2) + "…" + T.num(lmax, 2);
+
+    if (!(probH > 1e-12) && !(probN > 1e-12)) {
+      statusT.className = "status err";
+      statusT.textContent = "при таких n, k, r обе вероятности равны нулю — " +
+        "сдвиньте конец k/n или ослабьте запрет r";
+    } else {
+      statusT.className = "status";
+      statusT.textContent = "пересчитано: n = " + n + ", k = " + k + ", r = " + r;
+    }
+
+    drawTypicalPlot("plot-typical-hom", lamH, k, r, m,
+      1000 + n + Math.round(c * 100) + r,
+      "однородный шаг · λᵢ = 1 + c", probH);
+    drawTypicalPlot("plot-typical-het", lamN, k, r, m,
+      2000 + n + Math.round(c * 100) + r,
+      "неоднородный шаг · λᵢ = 1 + c wᵢ", probN);
   }
 
   /* ---------------------------------------------------------- 1.4 */

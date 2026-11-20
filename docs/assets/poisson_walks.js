@@ -173,6 +173,20 @@
     return out;
   };
 
+  /* Базовый профиль как в ER: w_i ∝ (1-1/n)^{i-1}, Σw_i = n;
+     λ_i = 1 + c w_i, средний снос c. */
+  P.erdosProfile = function (n, c) {
+    var p = 1 / n;
+    var geom = (1 - Math.pow(1 - p, n)) / p;
+    var lam = new Float64Array(n);
+    var w = 1;
+    for (var i = 0; i < n; i++) {
+      lam[i] = 1 + c * n * w / geom;
+      w *= (1 - p);
+    }
+    return lam;
+  };
+
   /* ------------------------------------------------------------------
    * Мост для неоднородного шага X_i = Y_i - 1, Y_i ~ Poisson(lam[i]).
    * Барьер S_i > r стоит при 1 <= i < n; концы S_0 = 0 и S_n = k не
