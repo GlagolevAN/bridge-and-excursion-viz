@@ -118,72 +118,6 @@
     </div>
   </section>
 
-  <!-- ============================================================ 1.2 -->
-  <section class="card" id="cramer">
-    <h2><span class="num">1.2</span>Наклон Крамера: мост = наклонённое блуждание</h2>
-    <p>
-      Здесь шаг устроен иначе: $X_i = Y_i - 1$, где
-      $Y_i \sim \mathrm{Poisson}(1)$ независимы. Снос равен нулю, но шаг
-      не ограничен сверху, поэтому и мост, и его наклон выглядят содержательнее,
-      чем у шагов $\pm1$. Условие на конец — снова смена меры, и наклонённый
-      шаг опять пуассоновский:
-    </p>
-    <div class="formula">
-      $$\mathbf{E}e^{\theta X_i} = e^{\lambda(e^\theta-1)-\theta},\qquad
-        X_i^{(\theta)} \sim \mathrm{Poisson}\!\left(\lambda e^\theta\right) - 1,$$
-      $$\mathbf{E}_\theta X_i = \lambda e^\theta - 1 = \frac{k}{n}
-        \quad\Longleftrightarrow\quad
-        \lambda e^\theta = 1 + \frac{k}{n}\quad(\lambda = 1).$$
-    </div>
-    <p class="small">
-      То есть наклонённое блуждание — это $\mathrm{Poisson}(1+k/n)-1$:
-      его шаг зависит только от $k/n$. Верхний график — распределение шага
-      до и после наклона при выбранном $k/n$; средний — условная
-      положительность моста и безусловная положительность наклонённого
-      блуждания; нижний — модуль их разности.
-    </p>
-    <p class="small">
-      Равенство предельное: в теореме о сопряжённой мере в
-      <code>rec_struct</code> это двойной предел (сначала $n\to\infty$,
-      затем $T\to\infty$), а при конечном $n$ кривые расходятся на
-      $O(n^{-1/2})$ — ползунок $n$ показывает, как зазор убывает. Для шагов
-      $\pm1$ такой картинки не вышло бы: по теореме о баллотировке при
-      $k>0$ условная вероятность равна ровно $k/n$ при любом сносе, а
-      наклонённое $p'=(1+k/n)/2$ тоже зависит только от $k/n$ — обе кривые
-      визуально сливаются с прямой $y=k/n$, и ползунок сноса ничего не меняет.
-    </p>
-    <div class="split">
-      <div class="stack">
-        <div class="plot" id="plot-pmf"></div>
-        <div class="plot" id="plot-cramer"></div>
-        <div class="plot short" id="plot-cramer-diff"></div>
-        <div class="legend-note">
-          Все кривые — точные динамические программы по $(i,h)$, не
-          Монте-Карло; отброшен только пуассоновский хвост шага
-          (масса $&lt; 10^{-15}$).
-        </div>
-      </div>
-      <div class="stack">
-        <div class="controls" id="ctl-cramer">
-          <div class="ctl">
-            <label for="k-n">длина <i>n</i> <output id="k-n-out">400</output></label>
-            <input id="k-n" type="range" min="120" max="400" step="8" value="400">
-          </div>
-          <div class="ctl">
-            <label for="k-f">выделенный конец <i>k/n</i> <output id="k-f-out">0,56</output></label>
-            <input id="k-f" type="range" min="0" max="1.2" step="0.02" value="0.56" data-type="float" data-fmt="2">
-          </div>
-        </div>
-        <div class="readout">
-          <div><b id="k-theta">—</b><span>θ</span></div>
-          <div><b id="k-lam">—</b><span>λ′ = λe<sup>θ</sup></span></div>
-          <div><b id="k-diff">—</b><span>max |разность|</span></div>
-        </div>
-        <div class="status" id="k-status"></div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============================================================ 1.3 -->
   <section class="card" id="excursion">
     <h2><span class="num">1.3</span>Экскурсия: факторизация по среднему сечению</h2>
@@ -291,6 +225,72 @@
           <div><b id="ld-mc">—</b><span>выборок с выходом</span></div>
         </div>
         <div class="status" id="ld-status"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 1.2 -->
+  <section class="card" id="cramer">
+    <h2><span class="num">1.2</span>Наклон Крамера: мост = наклонённое блуждание</h2>
+    <p>
+      Здесь шаг устроен иначе: $X_i = Y_i - 1$, где
+      $Y_i \sim \mathrm{Poisson}(1)$ независимы. Снос равен нулю, но шаг
+      не ограничен сверху, поэтому и мост, и его наклон выглядят содержательнее,
+      чем у шагов $\pm1$. Условие на конец — снова смена меры, и наклонённый
+      шаг опять пуассоновский:
+    </p>
+    <div class="formula">
+      $$\mathbf{E}e^{\theta X_i} = e^{\lambda(e^\theta-1)-\theta},\qquad
+        X_i^{(\theta)} \sim \mathrm{Poisson}\!\left(\lambda e^\theta\right) - 1,$$
+      $$\mathbf{E}_\theta X_i = \lambda e^\theta - 1 = \frac{k}{n}
+        \quad\Longleftrightarrow\quad
+        \lambda e^\theta = 1 + \frac{k}{n}\quad(\lambda = 1).$$
+    </div>
+    <p class="small">
+      То есть наклонённое блуждание — это $\mathrm{Poisson}(1+k/n)-1$:
+      его шаг зависит только от $k/n$. Верхний график — распределение шага
+      до и после наклона при выбранном $k/n$; средний — условная
+      положительность моста и безусловная положительность наклонённого
+      блуждания; нижний — модуль их разности.
+    </p>
+    <p class="small">
+      Равенство предельное: в теореме о сопряжённой мере в
+      <code>rec_struct</code> это двойной предел (сначала $n\to\infty$,
+      затем $T\to\infty$), а при конечном $n$ кривые расходятся на
+      $O(n^{-1/2})$ — ползунок $n$ показывает, как зазор убывает. Для шагов
+      $\pm1$ такой картинки не вышло бы: по теореме о баллотировке при
+      $k>0$ условная вероятность равна ровно $k/n$ при любом сносе, а
+      наклонённое $p'=(1+k/n)/2$ тоже зависит только от $k/n$ — обе кривые
+      визуально сливаются с прямой $y=k/n$, и ползунок сноса ничего не меняет.
+    </p>
+    <div class="split">
+      <div class="stack">
+        <div class="plot" id="plot-pmf"></div>
+        <div class="plot" id="plot-cramer"></div>
+        <div class="plot short" id="plot-cramer-diff"></div>
+        <div class="legend-note">
+          Все кривые — точные динамические программы по $(i,h)$, не
+          Монте-Карло; отброшен только пуассоновский хвост шага
+          (масса $&lt; 10^{-15}$).
+        </div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-cramer">
+          <div class="ctl">
+            <label for="k-n">длина <i>n</i> <output id="k-n-out">400</output></label>
+            <input id="k-n" type="range" min="120" max="400" step="8" value="400">
+          </div>
+          <div class="ctl">
+            <label for="k-f">выделенный конец <i>k/n</i> <output id="k-f-out">0,56</output></label>
+            <input id="k-f" type="range" min="0" max="1.2" step="0.02" value="0.56" data-type="float" data-fmt="2">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="k-theta">—</b><span>θ</span></div>
+          <div><b id="k-lam">—</b><span>λ′ = λe<sup>θ</sup></span></div>
+          <div><b id="k-diff">—</b><span>max |разность|</span></div>
+        </div>
+        <div class="status" id="k-status"></div>
       </div>
     </div>
   </section>

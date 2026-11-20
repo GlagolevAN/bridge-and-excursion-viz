@@ -321,6 +321,18 @@ button.primary:hover { background: #2560c8; color: #fff; }
   padding-top: 9px;
 }
 
+/* Предупреждение о статусе раздела: результаты ещё не доказаны. */
+.notice {
+  background: #fff8ec;
+  border: 1px solid #f2d2a4;
+  border-left: 4px solid var(--amber);
+  border-radius: 0 10px 10px 0;
+  padding: 13px 17px;
+  margin: 18px 0;
+  font: 400 15px/1.55 var(--sans);
+}
+.notice strong { color: #9a5600; }
+
 footer {
   border-top: 1px solid var(--line);
   margin-top: 40px;
