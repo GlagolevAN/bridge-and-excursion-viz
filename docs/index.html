@@ -97,11 +97,11 @@
         </div>
       </figure>
       <figure class="fig">
-        <a href="figures/fig10_large_dev_exit_blog.png"><img src="figures/fig10_large_dev_exit_blog.png" alt="Выход ниже нуля при большом уклоне" loading="lazy"></a>
+        <a href="figures/fig10_large_dev_exit_blog.png"><img src="figures/fig10_large_dev_exit_blog.png" alt="Выход ниже нуля" loading="lazy"></a>
         <div class="body">
-          <div class="tagline">рис. 10 · большие уклонения</div>
+          <div class="tagline">рис. 10 · выход ниже нуля</div>
           <h4>Выход ниже нуля — в начале траектории</h4>
-          <p>Шаг $X_i=\mathrm{Poisson}(1)-2$, конец $k=\theta n$. Условный мост растёт со скоростью $\theta$; если он и уходит ниже нуля, то только в первые шаги. Справа — точная $\mathbb{P}(\tau\ge t\mid S_n=k)$, где $\tau$ — последний момент ниже нуля: хвост убывает экспоненциально.</p>
+          <p>Шаг $X_i=\mathrm{Poisson}(1)-2$, конец $k=\theta n$. Если траектория уходит ниже нуля, то чаще всего в начале; справа — точная $\mathbb{P}(\tau\ge t\mid S_n=k)$.</p>
         </div>
       </figure>
     </div>
@@ -181,7 +181,7 @@
         <div class="body">
           <div class="tagline">интерактив · <code>rec_struct</code></div>
           <h4>Структура моста</h4>
-          <p>Типичный мост с барьером, наклон Крамера на пуассоновском шаге, факторизация экскурсии и выход ниже нуля при большом уклоне. Четыре опыта, все значения точные.</p>
+          <p>Неоднородное блуждание при типичном сносе, наклон Крамера на пуассоновском шаге, факторизация экскурсии и выход ниже нуля. Четыре опыта, все значения точные.</p>
         </div>
       </figure>
 
@@ -250,8 +250,7 @@
       <li><code>make_all.py</code> — пересобрать всё и прогнать проверки; <code>qa.py</code> — проверки без визуального просмотра.</li>
       <li><code>docs/</code> — этот сайт; публикуется из папки <code>docs/</code> ветки <code>main</code>.</li>
     </ul>
-    <pre>cd viz
-python -m venv .venv &amp;&amp; . .venv/bin/activate
+    <pre>python -m venv .venv &amp;&amp; . .venv/bin/activate
 pip install -r requirements.txt
 python make_all.py          # все фигуры + QA
 python make_all.py fig3 fig9  # только выбранные</pre>

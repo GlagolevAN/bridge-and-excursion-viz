@@ -50,8 +50,7 @@
     без сэмплирования с отвержением. В опыте 1.2 шаг другой —
     $X_i\sim\mathrm{Poisson}(1)-1$; там та же динамика по $(i,h)$, но с
     усечённым пуассоновским хвостом шага. В опыте 1.4 шаг
-    $X_i\sim\mathrm{Poisson}(1)-2$: снос отрицательный, а конец — в зоне
-    больших уклонений.
+    $X_i\sim\mathrm{Poisson}(1)-2$: снос отрицательный, а конец положительный.
   </p>
 
   <div class="formula">
@@ -67,22 +66,24 @@
 
   <!-- ============================================================ 1.1 -->
   <section class="card" id="typical">
-    <h2><span class="num">1.1</span>Типичный мост при постоянном сносе</h2>
+    <h2><span class="num">1.1</span>Неоднородное блуждание при типичном сносе</h2>
     <p>
-      При $p_i = (1+c)/2$ мост $S_n = k$ с $k \approx cn$ идёт почти по прямой
-      $i \mapsto ki/n$: снос под условием на конец перестаёт быть случайным.
-      Полоса на рисунке — поточечные квантили 5 % и 95 % точного условного
-      распределения, а не разброс выборки.
+      При $p_i = (1+c)/2$ неоднородное блуждание с типичным сносом $c$
+      и типичным концом $k \approx cn$ идёт почти по прямой
+      $i \mapsto ki/n$: флуктуации не накапливаются. Полоса на рисунке —
+      поточечные квантили 5 % и 95 % точного распределения, а не разброс
+      выборки.
     </p>
     <div class="split">
       <div class="stack">
         <div class="plot tall" id="plot-typical"></div>
         <div class="legend-note">
-          Тонкие линии — независимые точные выборки моста. Красная пунктирная
-          линия — запрет $S_i = r$; точка — конец $S_n = k$. Зелёная линия —
-          условное среднее $\mathbf{E}[S_i \mid S_n = k]$: оно плавно приходит
-          ровно в $k$, без скачка на последнем шаге. Перетаскивайте
-          ползунки: правый столбец пересчитывается без перезагрузки страницы.
+          Тонкие линии — независимые точные выборки при условии $S_n = k$.
+          Красная пунктирная линия — уровень $r$; точка — конец $S_n = k$.
+          Зелёная линия — условное среднее
+          $\mathbf{E}[S_i \mid S_n = k]$: оно плавно приходит ровно в $k$,
+          без скачка на последнем шаге. Перетаскивайте ползунки: правый
+          столбец пересчитывается без перезагрузки страницы.
         </div>
       </div>
       <div class="stack">
@@ -114,117 +115,6 @@
           <div><b id="t-mean">—</b><span>средний конец</span></div>
         </div>
         <div class="status" id="t-status"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================ 1.3 -->
-  <section class="card" id="excursion">
-    <h2><span class="num">1.3</span>Экскурсия: факторизация по среднему сечению</h2>
-    <p>
-      Двухблочный снос: $+c$ до $m = n/2$ и $-c$ после. Типичная траектория —
-      «горб». Теорема утверждает, что при условии $S_m = k$ половины
-      асимптотически независимы, поэтому
-    </p>
-    <div class="formula">
-      $$\mathbb{P}\!\left(S_i>0,\ i&lt;n \mid S_n=0\right)
-        \;\approx\; q_1\,q_2,\qquad
-        q_1 = \mathbb{P}\!\left(S_i>0,\ i&lt;m \mid S_m = k\right),\quad
-        q_2 = \mathbb{P}\!\left(S_i>0,\ m&lt;i&lt;n \mid S_m = k\right).$$
-    </div>
-    <div class="split">
-      <div class="stack">
-        <div class="plot" id="plot-exc-paths"></div>
-        <div class="plot" id="plot-exc-curve"></div>
-      </div>
-      <div class="stack">
-        <div class="controls" id="ctl-exc">
-          <div class="ctl">
-            <label for="e-n">длина <i>n</i> <output id="e-n-out">240</output></label>
-            <input id="e-n" type="range" min="80" max="600" step="4" value="240">
-          </div>
-          <div class="ctl">
-            <label for="e-c">амплитуда <i>c</i> <output id="e-c-out">0,30</output></label>
-            <input id="e-c" type="range" min="0.1" max="0.5" step="0.01" value="0.3" data-type="float" data-fmt="2">
-          </div>
-        </div>
-        <div class="readout">
-          <div><b id="e-full">—</b><span>весь мост</span></div>
-          <div><b id="e-prod">—</b><span>q₁·q₂</span></div>
-          <div><b id="e-k">—</b><span>типичное k</span></div>
-        </div>
-        <div class="status" id="e-status"></div>
-        <div class="legend-note">
-          Верхний график — точные выборки экскурсии при текущих $n$, $c$.
-          Нижний — сравнение полного моста и произведения половин при
-          фиксированном $c$ и разных $n$ (маркер отмечает текущее $n$).
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================ 1.4 -->
-  <section class="card" id="large-dev">
-    <h2><span class="num">1.4</span>Большие уклонения: выход ниже нуля — в начале</h2>
-    <p>
-      Шаг здесь другой: $X_i = Y_i - 2$, $Y_i \sim \mathrm{Poisson}(1)$;
-      снос равен $-1$, дисперсия $1$. Конец лежит в зоне больших уклонений:
-      $S_n = k$, $k/n = \theta > 0$. Преобразование Крамера снова даёт
-      пуассоновский шаг, и наклонённое блуждание имеет положительный снос:
-    </p>
-    <div class="formula">
-      $$\mathbf{E}e^{\alpha X_i} = e^{\lambda(e^\alpha-1)-2\alpha},\qquad
-        X_i^{(\alpha)} \sim \mathrm{Poisson}\!\left(\lambda e^\alpha\right) - 2,
-        \qquad \lambda' = \theta + 2,$$
-      $$\mathbf{E}_\theta X_i = \lambda' - 2 = \theta = \frac{k}{n}.$$
-    </div>
-    <p class="small">
-      При фиксированном $k/n$ условный закон моста не зависит от $\lambda$:
-      отношение правдоподобий двух пуассоновских моделей постоянно на
-      событии $\{S_n = k\}$, поэтому картинка определяется только $\theta$.
-    </p>
-    <p>
-      Поэтому условный мост выглядит как наклонённое блуждание с
-      положительным сносом $\theta$: он растёт. Если траектория всё-таки
-      уходит ниже нуля, то только в начале — после последнего такого
-      момента $\tau$ она остаётся неотрицательной. Поздний выход означал бы
-      спуск с высоты порядка $t$, то есть большое уклонение влево, поэтому
-      $\mathbb{P}(\tau \ge t \mid S_n = k)$ убывает экспоненциально по $t$.
-    </p>
-    <div class="split">
-      <div class="stack">
-        <div class="plot tall" id="plot-ld-paths"></div>
-        <div class="plot" id="plot-ld-zoom"></div>
-        <div class="plot short" id="plot-ld-tail"></div>
-        <div class="legend-note">
-          Верхний график — точные выборки моста при текущих $n$ и $\theta$.
-          Средний — первые 40 шагов; красным выделен участок до последнего
-          выхода ниже нуля, точка — сам момент $\tau$. Нижний — точная
-          $\mathbb{P}(\tau \ge t \mid S_n = k)$ из динамики по $(i,h)$,
-          не Монте-Карло; пунктир — медиана $\tau$ при условии, что выход был.
-        </div>
-      </div>
-      <div class="stack">
-        <div class="controls" id="ctl-ld">
-          <div class="ctl">
-            <label for="l-n">длина <i>n</i> <output id="l-n-out">400</output></label>
-            <input id="l-n" type="range" min="160" max="480" step="8" value="400">
-          </div>
-          <div class="ctl">
-            <label for="l-theta">конец <i>k/n</i> <output id="l-theta-out">1,00</output></label>
-            <input id="l-theta" type="range" min="0.4" max="1.8" step="0.02" value="1" data-type="float" data-fmt="2">
-          </div>
-          <div class="ctl">
-            <label for="l-m">выборок <output id="l-m-out">16</output></label>
-            <input id="l-m" type="range" min="4" max="32" step="2" value="16">
-          </div>
-        </div>
-        <div class="readout">
-          <div><b id="ld-dip">—</b><span>P(выход) точно</span></div>
-          <div><b id="ld-med">—</b><span>медиана τ при выходе</span></div>
-          <div><b id="ld-mc">—</b><span>выборок с выходом</span></div>
-        </div>
-        <div class="status" id="ld-status"></div>
       </div>
     </div>
   </section>
@@ -295,6 +185,101 @@
     </div>
   </section>
 
+  <!-- ============================================================ 1.3 -->
+  <section class="card" id="excursion">
+    <h2><span class="num">1.3</span>Экскурсия: факторизация по среднему сечению</h2>
+    <p>
+      Двухблочный снос: $+c$ до $m = n/2$ и $-c$ после. Типичная траектория —
+      «горб». Теорема утверждает, что при условии $S_m = k$ половины
+      асимптотически независимы, поэтому
+    </p>
+    <div class="formula">
+      $$\mathbb{P}\!\left(S_i>0,\ i&lt;n \mid S_n=0\right)
+        \;\approx\; q_1\,q_2,\qquad
+        q_1 = \mathbb{P}\!\left(S_i>0,\ i&lt;m \mid S_m = k\right),\quad
+        q_2 = \mathbb{P}\!\left(S_i>0,\ m&lt;i&lt;n \mid S_m = k\right).$$
+    </div>
+    <div class="split">
+      <div class="stack">
+        <div class="plot" id="plot-exc-paths"></div>
+        <div class="plot" id="plot-exc-curve"></div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-exc">
+          <div class="ctl">
+            <label for="e-n">длина <i>n</i> <output id="e-n-out">240</output></label>
+            <input id="e-n" type="range" min="80" max="600" step="4" value="240">
+          </div>
+          <div class="ctl">
+            <label for="e-c">амплитуда <i>c</i> <output id="e-c-out">0,30</output></label>
+            <input id="e-c" type="range" min="0.1" max="0.5" step="0.01" value="0.3" data-type="float" data-fmt="2">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="e-full">—</b><span>весь мост</span></div>
+          <div><b id="e-prod">—</b><span>q₁·q₂</span></div>
+          <div><b id="e-k">—</b><span>типичное k</span></div>
+        </div>
+        <div class="status" id="e-status"></div>
+        <div class="legend-note">
+          Верхний график — точные выборки экскурсии при текущих $n$, $c$.
+          Нижний — сравнение полного моста и произведения половин при
+          фиксированном $c$ и разных $n$ (маркер отмечает текущее $n$).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ 1.4 -->
+  <section class="card" id="large-dev">
+    <h2><span class="num">1.4</span>Выход ниже нуля — в начале</h2>
+    <p>
+      Если траектория всё-таки уходит ниже нуля, то чаще всего это
+      происходит в начале: после последнего такого выхода она уже остаётся
+      неотрицательной.
+    </p>
+    <p class="small">
+      Шаг $X_i = Y_i - 2$, $Y_i \sim \mathrm{Poisson}(1)$; конец
+      $k/n = \theta > 0$.
+    </p>
+    <div class="split">
+      <div class="stack">
+        <div class="plot tall" id="plot-ld-paths"></div>
+        <div class="plot" id="plot-ld-zoom"></div>
+        <div class="plot short" id="plot-ld-tail"></div>
+        <div class="legend-note">
+          Верхний график — точные выборки при текущих $n$ и $\theta$.
+          Средний — первые 40 шагов; красным выделен участок до последнего
+          выхода ниже нуля, точка — момент $\tau$. Нижний — точная
+          $\mathbb{P}(\tau \ge t \mid S_n = k)$; пунктир — медиана $\tau$.
+        </div>
+      </div>
+      <div class="stack">
+        <div class="controls" id="ctl-ld">
+          <div class="ctl">
+            <label for="l-n">длина <i>n</i> <output id="l-n-out">400</output></label>
+            <input id="l-n" type="range" min="160" max="480" step="8" value="400">
+          </div>
+          <div class="ctl">
+            <label for="l-theta">конец <i>k/n</i> <output id="l-theta-out">1,00</output></label>
+            <input id="l-theta" type="range" min="0.4" max="1.8" step="0.02" value="1" data-type="float" data-fmt="2">
+          </div>
+          <div class="ctl">
+            <label for="l-m">выборок <output id="l-m-out">16</output></label>
+            <input id="l-m" type="range" min="4" max="32" step="2" value="16">
+          </div>
+        </div>
+        <div class="readout">
+          <div><b id="ld-dip">—</b><span>P(выход) точно</span></div>
+          <div><b id="ld-med">—</b><span>медиана τ при выходе</span></div>
+          <div><b id="ld-mc">—</b><span>выборок с выходом</span></div>
+        </div>
+        <div class="status" id="ld-status"></div>
+      </div>
+    </div>
+  </section>
+
+
   <footer>
     <p>
       Точные расчёты: <code>common/walks.py</code>, <code>common/poisson.py</code>
@@ -327,8 +312,11 @@
     if (!(prob > 1e-12)) {
       Plotly.purge("plot-typical");
       statusT.className = "status err";
-      statusT.textContent = "при таких n, k, r условная вероятность равна нулю — " +
-        "сдвиньте конец k/n или ослабьте запрет r";
+      statusT.textContent = (r >= 1)
+        ? "при r ≥ 1 у шагов ±1 событие невозможно уже при i = 1: S₁ = ±1; " +
+          "концы S₀ и Sₙ не ограничены"
+        : "при таких n, k, r условная вероятность равна нулю — " +
+          "сдвиньте конец k/n или ослабьте запрет r";
       document.getElementById("t-mean").textContent = "—";
       return;
     }

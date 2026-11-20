@@ -163,12 +163,14 @@ class Bridge:
         """P(S_i > r, 1 <= i < n | S_n = k) -- точно."""
         if self.r is None:
             return 1.0
-        # k == r допустимо: граница контролируется только при i < n,
-        # поэтому путь может закончиться ровно на уровне r.
-        if self.k < self.r:
-            return 0.0
+        # Концы не контролируются: S_0 = 0 и S_n = k могут быть <= r;
+        # граница стоит только при 1 <= i < n.
         off = self.n + 1
-        pos_row, logpos = self._last(True)
+        try:
+            pos_row, logpos = self._last(True)
+        except ValueError:
+            # событие несовместимо с барьером (например, шаг ±1 и r >= 1)
+            return 0.0
         all_row, logall = self._last(False)
         pos = pos_row[off + self.k]
         allp = all_row[off + self.k]

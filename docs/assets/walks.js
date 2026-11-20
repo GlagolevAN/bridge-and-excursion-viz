@@ -121,7 +121,8 @@
       if (Math.abs(k) > n) return 0;
       return 1;
     }
-    if (k < r) return 0;
+    /* Концы не контролируются: S_0 = 0 и S_n = k могут быть <= r;
+       барьер стоит только при 1 <= i < n. */
     var pos = runDP(p, k, r, false);
     var all = runDP(p, k, null, false);
     if (!(all.last > 0) || !(pos.last > 0)) return 0;
