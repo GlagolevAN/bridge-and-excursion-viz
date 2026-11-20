@@ -38,18 +38,18 @@
       остаться положительной выражается через наклон Крамера и почему
       экскурсия распадается на две независимые половины.
     </p>
-    <p class="meta">Шаги ±1 (1.1, 1.2), пуассоновские −1 (1.4) и −2 (1.3) · точные динамические программы · четыре интерактивных опыта</p>
+    <p class="meta">Шаги Пуассона −1 (1.1, 1.4), ±1 (1.2) и Пуассона −2 (1.3) · точные динамические программы · четыре интерактивных опыта</p>
   </div>
 
   <!-- ============================================================ 1.1 -->
   <section class="card" id="typical">
     <h2><span class="num">1.1</span>Неоднородное блуждание при типичном сносе</h2>
     <p>
-      При $p_i = (1+c)/2$ неоднородное блуждание с типичным сносом $c$
-      и типичным концом $k \approx cn$ идёт почти по прямой
-      $i \mapsto ki/n$: флуктуации не накапливаются. Полоса на рисунке —
-      поточечные квантили 5 % и 95 % точного распределения, а не разброс
-      выборки.
+      Шаг $X_i=Y_i-1$, $Y_i\sim\mathrm{Poisson}(1+c)$, принимает значения
+      $-1,0,1,2,\dots$; его среднее равно $c$. При типичном конце
+      $k \approx cn$ мост идёт почти по прямой $i \mapsto ki/n$:
+      флуктуации не накапливаются. Полоса на рисунке — поточечные
+      квантили 5 % и 95 % точного распределения, а не разброс выборки.
     </p>
     <div class="split">
       <div class="stack">
@@ -57,10 +57,11 @@
         <div class="legend-note">
           Тонкие линии — независимые точные выборки при условии $S_n = k$.
           Красная пунктирная линия — уровень $r$; точка — конец $S_n = k$.
-          Зелёная линия — условное среднее
-          $\mathbf{E}[S_i \mid S_n = k]$: оно плавно приходит ровно в $k$,
-          без скачка на последнем шаге. Перетаскивайте ползунки: правый
-          столбец пересчитывается без перезагрузки страницы.
+          Шаг пуассоновский, поэтому траектория может перепрыгнуть уровень
+          $r$, и запрет при $r>0$ содержателен. Зелёная линия — условное
+          среднее $\mathbf{E}[S_i \mid S_n = k]$: оно плавно приходит ровно
+          в $k$, без скачка на последнем шаге. Перетаскивайте ползунки:
+          правый столбец пересчитывается без перезагрузки страницы.
         </div>
       </div>
       <div class="stack">
@@ -279,30 +280,29 @@
 
   function typical(v) {
     var n = v["t-n"], c = v["t-c"], frac = v["t-f"], r = v["t-r"], m = v["t-m"];
-    var p = Walks.constProfile(n, c);
-    var k = Walks.parityK(n, frac * n);
-    var prob = Walks.bridgeProb(p, k, r);
+    var lam = new Float64Array(n);
+    lam.fill(1 + c);                          // X_i = Poisson(1+c) - 1
+    var k = Math.round(frac * n);
+    var prob = PoissonWalks.bridgeProb(lam, k, r);
     document.getElementById("t-k").textContent = k;
     document.getElementById("t-prob").textContent = T.num(prob, 3);
 
     if (!(prob > 1e-12)) {
       Plotly.purge("plot-typical");
       statusT.className = "status err";
-      statusT.textContent = (r >= 1)
-        ? "при r ≥ 1 у шагов ±1 событие невозможно уже при i = 1: S₁ = ±1; " +
-          "концы S₀ и Sₙ не ограничены"
-        : "при таких n, k, r условная вероятность равна нулю — " +
-          "сдвиньте конец k/n или ослабьте запрет r";
+      statusT.textContent = "при таких n, k, r условная вероятность равна нулю — " +
+        "сдвиньте конец k/n или ослабьте запрет r";
       document.getElementById("t-mean").textContent = "—";
       return;
     }
     statusT.className = "status";
-    statusT.textContent = "пересчитано: n = " + n + ", k = " + k + ", r = " + r;
+    statusT.textContent = "пересчитано: n = " + n + ", k = " + k + ", r = " + r +
+      " · шаг Poisson(1+c) − 1";
 
-    var dp = Walks.bridgeRows(p, k, r);
-    var st = Walks.bridgeStats(dp, p, k, r, 0.05, 0.95);
+    var dp = PoissonWalks.bridgeDP(lam, k, r, true);
+    var st = PoissonWalks.bridgeStats(dp, lam, k, r, 0.05, 0.95);
     var rng = new RNG(1000 + n + Math.round(c * 100) + r);
-    var paths = Walks.sampleBridge(p, k, r, m, rng, dp);
+    var paths = PoissonWalks.sampleBridge(lam, k, r, m, rng, dp);
     var x = [];
     for (var i = 0; i <= n; i++) x.push(i);
 
