@@ -311,6 +311,46 @@ button.primary:hover { background: #2560c8; color: #fff; }
   margin-bottom: 7px;
 }
 
+/* ------------------------------------------------------------- литература */
+
+.refs {
+  margin: 0 0 30px;
+  padding: 14px 18px 6px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  font: 400 14px/1.55 var(--sans);
+  break-inside: avoid;
+}
+.refs h4 {
+  font: 600 12px/1 var(--sans);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+.refs ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ref;
+}
+.refs li {
+  counter-increment: ref;
+  position: relative;
+  margin: 0 0 7px;
+  padding-left: 34px;
+}
+.refs li::before {
+  content: "[" counter(ref) "]";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--accent);
+  font: 500 13px/1.55 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ------------------------------------------------------------- прочее */
 
 .legend-note {
