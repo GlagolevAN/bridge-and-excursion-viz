@@ -314,20 +314,9 @@ button.primary:hover { background: #2560c8; color: #fff; }
 /* ------------------------------------------------------------- литература */
 
 .refs {
-  margin: 0 0 30px;
-  padding: 14px 18px 6px;
-  background: #f8fafc;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  font: 400 14px/1.55 var(--sans);
+  margin: 0;
+  font: 400 14.5px/1.58 var(--sans);
   break-inside: avoid;
-}
-.refs h4 {
-  font: 600 12px/1 var(--sans);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 10px;
 }
 .refs ol {
   margin: 0;
