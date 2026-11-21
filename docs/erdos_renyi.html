@@ -607,9 +607,9 @@
     /* правая панель: порог по p */
     var ptraces = [];
     ns.forEach(function (n, idx) {
-      var pmax = Math.min(0.6, 4 * Math.log(n) / n);
+      var pmax = 0.25;
       var pts = [];
-      for (var j = 0; j <= 15; j++) pts.push(0.004 + (pmax - 0.004) * j / 15);
+      for (var j = 0; j <= 60; j++) pts.push(0.004 + (pmax - 0.004) * j / 60);
       ptraces.push({
         x: pts, y: pts.map(function (p) { return Erdos.connectivity(n, p); }),
         mode: "lines", name: "n = " + n,
@@ -623,7 +623,7 @@
       });
     });
     T.plot("plot-conn-threshold", ptraces, {
-      xaxis: { title: { text: "p" } },
+      xaxis: { title: { text: "p" }, range: [0, 0.25] },
       yaxis: { title: { text: "Pₙ(p) (лог. шкала)" }, type: "log" },
       margin: { l: 66, r: 18, t: 20, b: 96 }
     });
